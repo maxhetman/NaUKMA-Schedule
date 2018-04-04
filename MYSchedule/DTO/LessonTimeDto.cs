@@ -39,5 +39,11 @@ namespace MYSchedule.DTO
         {
             return $"{nameof(Number)}: {Number}, {nameof(LessonTimePeriod)}: {LessonTimePeriod}";
         }
+
+        public override int GetHashCode()
+        {
+            return (LessonTimePeriod != null ? LessonTimePeriod.GetHashCode() : 0);
+        }
+
     }
 }

@@ -16,47 +16,45 @@ namespace MYSchedule
         public static void Main(string[] args)
         {
 
+
+            Stopwatch stopWatch = new Stopwatch();
+            Console.WriteLine("Start parsing");
+            stopWatch.Start();
+            var schedule = ExcelParser.GetScheduleFromExcel();
+            stopWatch.Stop();
+            Console.WriteLine("Milis passed : " + stopWatch.Elapsed.Milliseconds);
+            var count = 0;
+
+            foreach (KeyValuePair<ScheduleRecordDto, List<int>> entry in schedule)
+            {
+                stopWatch.Restart();
+                bool isAdded = ScheduleRecordDao.AddIfNotExists(entry.Key);
+
+                if (!isAdded)
+                {
+                    continue;
+                }
+
+                foreach (var weekNumber in entry.Value)
+                {
+                    WeekScheduleDao.AddWeekSchedule(weekNumber: weekNumber, scheduleRecordId: entry.Key.Id);
+                }
+                stopWatch.Stop();
+                count++;
+                Console.WriteLine("Milis passed : " + stopWatch.Elapsed.Milliseconds + " for " + count + " record");
+            }
+
             Console.OutputEncoding = Encoding.UTF8;
-            var dt = QueryManager.GetClassRoomsAvailability(buildingNumber: 10, isComputer: true);
+            var dt = QueryManager.GetClassRoomsAvailability();
 
             foreach (DataRow one in dt.Rows)
             {
-                 Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}, {one[5]}");
+                Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}, {one[5]}");
             }
-          
+
             ExcelExportManager.ShowAllClassRooms(dt);
 
             Console.ReadLine();
-
-            //Console.ReadLine();
-            //Stopwatch stopWatch = new Stopwatch();
-            //Console.WriteLine("Start parsing");
-            //stopWatch.Start();
-            //var schedule = ExcelParser.GetScheduleFromExcel();
-            //stopWatch.Stop();
-            //Console.WriteLine("Milis passed : " + stopWatch.Elapsed.Milliseconds);
-            //var count = 0;
-
-            //foreach (KeyValuePair<ScheduleRecordDto, List<int>> entry in schedule)
-            //{
-            //    stopWatch.Restart();
-            //    bool isAdded = ScheduleRecordDao.AddIfNotExists(entry.Key);
-
-            //    if (!isAdded)
-            //    {
-            //        continue;
-            //    }
-
-            //    foreach (var weekNumber in entry.Value)
-            //    {
-            //        WeekScheduleDao.AddWeekSchedule(weekNumber: weekNumber, scheduleRecordId: entry.Key.Id);
-            //    }
-            //    stopWatch.Stop();
-            //    count++;
-            //    Console.WriteLine("Milis passed : " + stopWatch.Elapsed.Milliseconds + " for " + count + " record");
-            //}
-            //Console.ReadLine();
-
 
             //fileName = @"E:\kek.mdb";
             //var kek = DataBaseCreator.CreateNewAccessDatabase(fileName);

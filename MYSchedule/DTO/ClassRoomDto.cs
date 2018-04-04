@@ -18,5 +18,10 @@ namespace MYSchedule.DTO
         {
             return $"{nameof(Number)}: {Number}";
         }
+
+        public override int GetHashCode()
+        {
+            return (Number != null ? Number.GetHashCode() : 0);
+        }
     }
 }

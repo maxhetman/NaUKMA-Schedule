@@ -12,7 +12,7 @@ namespace MYSchedule.DataAccess
         public static DataTable GetClassRoomsAvailability(int? buildingNumber = null, bool? isComputer = null,
             string classroomNumber = null)
         {
-            string query = Queries.ClassroomsBusynessQuery(buildingNumber, isComputer, classroomNumber) ;
+            string query = Queries.ClassRoomsAvailabilityQuery(buildingNumber, isComputer, classroomNumber) ;
             
             DataTable DT = Access2Dt(query);
 

@@ -6,7 +6,7 @@
 
         private const string OrderByLessonTimeClassRoom = " ORDER BY L.Number, C.Number";
 
-        public static string ClassroomsBusynessQuery(int? buildingNumber, bool? isComputer,
+        public static string ClassRoomsAvailabilityQuery(int? buildingNumber, bool? isComputer,
             string classroomNumber)
         {
             var query = classroomsBusyness;

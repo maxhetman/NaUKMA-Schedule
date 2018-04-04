@@ -14,17 +14,17 @@ namespace MYSchedule.DTO
 
             switch (name)
             {
-                case "Понеділок":
+                case Constants.Monday:
                     return 1;
-                case "Вівторок":
+                case Constants.Tuesday:
                     return 2;
-                case "Середа":
+                case Constants.Wednesday:
                     return 3;
-                case "Четвер":
+                case Constants.Thursday:
                     return 4;
-                case "П`ятниця":
+                case Constants.Friday:
                     return 5;
-                case "Субота":
+                case Constants.Saturday:
                     return 6;
                 default:
                     if (name.EndsWith("тниця"))
@@ -41,6 +41,11 @@ namespace MYSchedule.DTO
         public override string ToString()
         {
             return $"{nameof(DayNumber)}: {DayNumber}, {nameof(DayName)}: {DayName}";
+        }
+
+        public override int GetHashCode()
+        {
+            return (DayName != null ? DayName.GetHashCode() : 0);
         }
     }
 }

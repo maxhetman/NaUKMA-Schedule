@@ -104,7 +104,7 @@ namespace MYSchedule.Parser
                     Weeks = weeksString
                 };
 
-                var weeksList = ParseWeeks(row[5].Value.ToString());
+                var weeksList = Utils.Utils.ParseWeeks(row[5].Value.ToString());
 
                 _weekScheduleRecords.Add(scheduleRecord, new List<int>());
                 foreach (var weekNumber in weeksList)
@@ -198,36 +198,6 @@ namespace MYSchedule.Parser
             };
         }
 
-        private static HashSet<int> ParseWeeks(string weeks)
-        {
-            weeks = weeks.Replace(" ", String.Empty);
-            var weeksArray = weeks.Split(',');
-            var weeksList = new HashSet<int>();
-            foreach (var value in weeksArray)
-            {
-                int weekNumber;
-                int.TryParse(value, out weekNumber);
-
-                if (weekNumber > 0)
-                {
-                    weeksList.Add(weekNumber);
-                    continue;
-                }
-                var notNumberRegexp = @"[^\d]";
-                var leftMatch = Regex.Match(value, notNumberRegexp);
-                var rightMatch = Regex.Match(value, notNumberRegexp, RegexOptions.RightToLeft);
-
-                if (leftMatch.Success && rightMatch.Success)
-                {
-                    var leftNumber = int.Parse(value.Substring(0, leftMatch.Index));
-                    var rightNumber = int.Parse(value.Substring(rightMatch.Index + 1));
-
-                    for (int i = leftNumber; i <= rightNumber; i++)
-                        weeksList.Add(i);
-                }
-            }
-            return weeksList;
-        }
     }
 
 
