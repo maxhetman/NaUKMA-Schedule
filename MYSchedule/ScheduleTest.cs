@@ -17,14 +17,16 @@ namespace MYSchedule
         {
 
             Console.OutputEncoding = Encoding.UTF8;
-            var dt = QueryManager.GetClassRoomsBusyness(buildingNumber: 10, isComputer: true);
+            var dt = QueryManager.GetClassRoomsAvailability(buildingNumber: 10, isComputer: true);
 
             foreach (DataRow one in dt.Rows)
             {
-                // Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}");
+                 Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}, {one[5]}");
             }
-
+          
             ExcelExportManager.ShowAllClassRooms(dt);
+
+            Console.ReadLine();
 
             //Console.ReadLine();
             //Stopwatch stopWatch = new Stopwatch();

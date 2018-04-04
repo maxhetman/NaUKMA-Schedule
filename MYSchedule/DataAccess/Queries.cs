@@ -4,7 +4,7 @@
     {
         private const string classroomsBusyness = @"Select D.DayName, L.LessonTimePeriod, S.ClassRoomNumber, T.LastName, T.Initials, S.Weeks From ((((ScheduleRecord S Inner Join [Day] D ON S.DayNumber = D.DayNumber) Inner Join Teacher T ON S.TeacherId = T.Id) Inner Join ClassRoom C ON S.ClassRoomNumber = C.Number) Inner Join LessonTime L ON S.LessonTimeNumber = L.Number) ";
 
-        private const string OrderByDayName = " ORDER BY L.Number, C.Number";
+        private const string OrderByLessonTimeClassRoom = " ORDER BY L.Number, C.Number";
 
         public static string ClassroomsBusynessQuery(int? buildingNumber, bool? isComputer,
             string classroomNumber)
@@ -28,7 +28,7 @@
                 query += "Where Number = " + classroomNumber;
             }
 
-            query += OrderByDayName;
+            query += OrderByLessonTimeClassRoom;
             return query;
         }
     }

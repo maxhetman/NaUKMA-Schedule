@@ -9,7 +9,7 @@ namespace MYSchedule.DataAccess
     public static class QueryManager
     {
 
-        public static DataTable GetClassRoomsBusyness(int? buildingNumber = null, bool? isComputer = null,
+        public static DataTable GetClassRoomsAvailability(int? buildingNumber = null, bool? isComputer = null,
             string classroomNumber = null)
         {
             string query = Queries.ClassroomsBusynessQuery(buildingNumber, isComputer, classroomNumber) ;
