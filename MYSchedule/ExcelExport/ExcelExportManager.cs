@@ -1,47 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Windows.Media;
-using LinqToExcel.Extensions;
 using Microsoft.Office.Interop.Excel;
-using MYSchedule.DataAccess;
 using MYSchedule.DTO;
 using DataTable = System.Data.DataTable;
-using MYSchedule.Utils;
 using Constants = MYSchedule.Utils.Constants;
 
 namespace MYSchedule.ExcelExport
 {
+    public struct CellIndex
+    {
+        public int x;
+        public int y;
+    }
+
+    public struct TeacherWeeksWithCellIndex
+    {
+        public string TeacherName;
+        public List<int> Weeks;
+        public CellIndex CellIndex;
+        public string DayName;
+    }
+
     class ExcelExportManager
     {
 
         #region Variables
 
-        private static Dictionary<int, string> LessonTime = new Dictionary<int, string>()
-        {
-            {1, "8:30-9:50"},
-            {2, "10:00-11:20"},
-            {3, "11:40-13:00"},
-            {4, "13:30-14:50"},
-            {5, "15:00-16:20"},
-            {6, "16:30-17:50"},
-            {7, "18:00-19:20"}
-        };
-
         private static Dictionary<string, CellIndex> DayCellsIndexes = new Dictionary<string, CellIndex>()
         {
-            {Constants.Monday, new CellIndex(){x = 2, y = 4}},
-            {Constants.Tuesday, new CellIndex(){x = 2, y = 6}},
-            {Constants.Wednesday, new CellIndex(){x = 2, y = 8}},
-            {Constants.Thursday, new CellIndex(){x = 2, y = 10}},
-            {Constants.Friday, new CellIndex(){x = 2, y = 12}},
-            {Constants.Saturday, new CellIndex(){x = 2, y = 14}}
+            {Constants.Monday, new CellIndex() {x = 2, y = 4}},
+            {Constants.Tuesday, new CellIndex() {x = 2, y = 6}},
+            {Constants.Wednesday, new CellIndex() {x = 2, y = 8}},
+            {Constants.Thursday, new CellIndex() {x = 2, y = 10}},
+            {Constants.Friday, new CellIndex() {x = 2, y = 12}},
+            {Constants.Saturday, new CellIndex() {x = 2, y = 14}}
         };
 
-        #endregion
         private static List<string> ClassRooms;
 
+        #endregion
 
         public static void ShowAllClassRooms(DataTable dataTable)
         {
@@ -49,15 +47,12 @@ namespace MYSchedule.ExcelExport
 
             excel.Application.Workbooks.Add(true);
 
-            int columnIndex = 0;
-            Worksheet worksheet = (Worksheet)excel.ActiveSheet;
-            
+            Worksheet worksheet = (Worksheet) excel.ActiveSheet;     
 
             InitStyle(worksheet);
 
-
-            CreateShowClassRoomsExcelHeader(worksheet);
-            CreateShowAllClassRoomsExcelSkeleton(worksheet, dataTable);
+            CreateHeader(worksheet);
+            CreateSkeleton(worksheet, dataTable);
             FillClassRooms(worksheet);
             FillTable(dataTable, worksheet);
 
@@ -65,7 +60,7 @@ namespace MYSchedule.ExcelExport
 
             worksheet.Range["A1", "U500"].Columns.AutoFit();
             worksheet.Range["A1", "U500"].Rows.AutoFit();
-            
+
             //   worksheet.Range["B1","B100"].EntireColumn.Style.Orientation = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
             worksheet.Activate();
         }
@@ -91,12 +86,14 @@ namespace MYSchedule.ExcelExport
             //worksheet.Activate();
         }
 
-        #region helpers
+        #region Helpers
 
         private static void FillTable(DataTable dataTable, Worksheet worksheet)
         {
             List<TeacherWeeksWithCellIndex> teachersData = new List<TeacherWeeksWithCellIndex>();
+
             var currentTime = -1;
+
             foreach (DataRow row in dataTable.Rows)
             {
 
@@ -126,61 +123,61 @@ namespace MYSchedule.ExcelExport
 
                 foreach (var teacherData in teachersData)
                 {
-                    if (teacherData.TeacherName == currentTeacherData.TeacherName 
+                    //teacher has more than one lesson in same time
+                    if (teacherData.TeacherName == currentTeacherData.TeacherName
                         && teacherData.DayName == currentTeacherData.DayName
                         && teacherData.Weeks.Intersect(currentTeacherData.Weeks).Any())
                     {
-                        worksheet.Range[worksheet.Cells[teacherData.CellIndex.x, teacherData.CellIndex.y], 
-                            worksheet.Cells[teacherData.CellIndex.x, teacherData.CellIndex.y + 1]].Interior.Color = XlRgbColor.rgbRed;
-                        worksheet.Range[worksheet.Cells[currentTeacherData.CellIndex.x, currentTeacherData.CellIndex.y],
-                            worksheet.Cells[currentTeacherData.CellIndex.x, currentTeacherData.CellIndex.y + 1]].Interior.Color = XlRgbColor.rgbRed;
-
+                        SetRedBackground(worksheet, teacherData.CellIndex, 
+                            new CellIndex { x= teacherData.CellIndex.x, y= teacherData.CellIndex.y + 1});
+                        SetRedBackground(worksheet, currentTeacherData.CellIndex,
+                            new CellIndex { x = currentTeacherData.CellIndex.x, y = currentTeacherData.CellIndex.y + 1 });
                     }
                 }
 
                 teachersData.Add(currentTeacherData);
-
-
-
-
             }
         }
 
         private static void AddCellInfo(Worksheet worksheet, CellIndex cellIndex, string teacherName, string weeks)
         {
             var prevWeeks = worksheet.Cells[cellIndex.x, cellIndex.y + 1].Text.ToString();
-            
+
             var hasPrevWeeks = !string.IsNullOrEmpty(prevWeeks);
 
-            if (hasPrevWeeks)
-            {
-                var prevName = worksheet.Cells[cellIndex.x, cellIndex.y].Text.ToString();
-                worksheet.Cells[cellIndex.x, cellIndex.y] = prevName +  "/\n" + teacherName;
-                worksheet.Cells[cellIndex.x, cellIndex.y+1] = prevWeeks +  "/\n" + weeks;
-
-                List<int> prevWeeksList = Utils.Utils.ParseWeeks(prevWeeks);
-                List<int> currWeeksList = Utils.Utils.ParseWeeks(weeks);
-                if (prevWeeksList.Intersect(currWeeksList).Any())
-                {
-                    //todo: change color
-                    worksheet.Range[worksheet.Cells[cellIndex.x, cellIndex.y], worksheet.Cells[cellIndex.x, cellIndex.y + 1]].Interior.Color = XlRgbColor.rgbRed;
-                }
-
-            }
-            else
+            if (!hasPrevWeeks)
             {
                 worksheet.Cells[cellIndex.x, cellIndex.y] = teacherName;
                 worksheet.Cells[cellIndex.x, cellIndex.y + 1] = weeks;
+                return;
             }
-            worksheet.Cells[cellIndex.x, cellIndex.y].Style.Font.Size = 12;
+
+            var prevName = worksheet.Cells[cellIndex.x, cellIndex.y].Text.ToString();
+            worksheet.Cells[cellIndex.x, cellIndex.y] = prevName + "/\n" + teacherName;
+            worksheet.Cells[cellIndex.x, cellIndex.y + 1] = prevWeeks + "/\n" + weeks;
+
+            List<int> prevWeeksList = Utils.Utils.ParseWeeks(prevWeeks);
+            List<int> currWeeksList = Utils.Utils.ParseWeeks(weeks);
+
+            if (prevWeeksList.Intersect(currWeeksList).Any())
+            {
+                SetRedBackground(worksheet, cellIndex, new CellIndex {x = cellIndex.x, y = cellIndex.y + 1});
+            }
         }
 
-        private static void CreateShowAllClassRoomsExcelSkeleton(Worksheet worksheet, DataTable dataTable)
-        {   
+        
+        private static void SetRedBackground(Worksheet worksheet, CellIndex from, CellIndex to)
+        {
+            worksheet.Range[worksheet.Cells[from.x, from.y],
+                worksheet.Cells[to.x, to.y]].Interior.Color = XlRgbColor.rgbRed;
+        }
+        private static void CreateSkeleton(Worksheet worksheet, DataTable dataTable)
+        {
             var classRoomNumbers = new HashSet<string>();
+
             foreach (DataRow row in dataTable.Rows)
             {
-                var number = row[2].ToString();  // check index in Max comp
+                var number = row[2].ToString();
                 if (!classRoomNumbers.Contains(number))
                 {
                     classRoomNumbers.Add(number);
@@ -188,13 +185,14 @@ namespace MYSchedule.ExcelExport
             }
 
             var len = classRoomNumbers.Count;
+
             for (int i = 0; i < 7; i++)
             {
                 var start = 4 + i * len;
                 worksheet.Range[worksheet.Cells[start, 1], worksheet.Cells[start + len - 1, 1]].Merge();
                 worksheet.Cells[start, 1] = i + 1;
                 worksheet.Range[worksheet.Cells[start, 2], worksheet.Cells[start + len - 1, 2]].Merge();
-                worksheet.Cells[start, 2] = LessonTime[i + 1];
+                worksheet.Cells[start, 2] = LessonTimeDto.GetPeriodFromNumber(i + 1);
             }
 
             ClassRooms = classRoomNumbers.ToList();
@@ -209,7 +207,7 @@ namespace MYSchedule.ExcelExport
 
                 for (int j = 0; j < classRoomLength; j++)
                 {
-                    worksheet.Cells[start+j, 3] = ClassRooms[j];
+                    worksheet.Cells[start + j, 3] = ClassRooms[j];
                 }
             }
         }
@@ -223,7 +221,7 @@ namespace MYSchedule.ExcelExport
             currentRange.Style.VerticalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
             currentRange.Style.NumberFormat = "@";
 
-           // worksheet.Range["C1","C50"].Style.Orientation  = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
+            // worksheet.Range["C1","C50"].Style.Orientation  = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
         }
 
         private static CellIndex GetIndexByDayLessonClassroom(string dayName, int lessonNumber, string classroom)
@@ -234,7 +232,7 @@ namespace MYSchedule.ExcelExport
             return new CellIndex {x = x, y = y};
         }
 
-        private static void CreateShowClassRoomsExcelHeader(Worksheet worksheet)
+        private static void CreateHeader(Worksheet worksheet)
         {
             var header = "Розклад аудиторій на весну 2017-2018";
 
@@ -272,19 +270,6 @@ namespace MYSchedule.ExcelExport
 
         #endregion
 
-        public struct CellIndex
-        {
-            public int x;
-            public int y;
-        }
-
-        public struct TeacherWeeksWithCellIndex
-        {
-            public string TeacherName;
-            public List<int> Weeks;
-            public CellIndex CellIndex;
-            public string DayName;
-        }
 
     }
 }
