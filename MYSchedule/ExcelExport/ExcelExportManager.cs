@@ -27,6 +27,8 @@ namespace MYSchedule.ExcelExport
 
         #region Variables
 
+        private static int finalXCoord;
+
         private static Dictionary<string, CellIndex> DayCellsIndexes = new Dictionary<string, CellIndex>()
         {
             {Constants.Monday, new CellIndex() {x = 2, y = 4}},
@@ -46,8 +48,7 @@ namespace MYSchedule.ExcelExport
             Application excel = new Application();
 
             excel.Application.Workbooks.Add(true);
-
-            Worksheet worksheet = (Worksheet) excel.ActiveSheet;     
+            Worksheet worksheet = (Worksheet) excel.ActiveSheet;
 
             InitStyle(worksheet);
 
@@ -58,12 +59,14 @@ namespace MYSchedule.ExcelExport
 
             excel.Visible = true;
 
-            worksheet.Range["A1", "U500"].Columns.AutoFit();
-            worksheet.Range["A1", "U500"].Rows.AutoFit();
+            FinalStyleAdditions(worksheet);
+           
 
             //   worksheet.Range["B1","B100"].EntireColumn.Style.Orientation = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
             worksheet.Activate();
         }
+
+       
 
 
         public static void SpecialityYearLesson(DataTable dataTable)
@@ -128,10 +131,10 @@ namespace MYSchedule.ExcelExport
                         && teacherData.DayName == currentTeacherData.DayName
                         && teacherData.Weeks.Intersect(currentTeacherData.Weeks).Any())
                     {
-                        SetRedBackground(worksheet, teacherData.CellIndex, 
-                            new CellIndex { x= teacherData.CellIndex.x, y= teacherData.CellIndex.y + 1});
-                        SetRedBackground(worksheet, currentTeacherData.CellIndex,
-                            new CellIndex { x = currentTeacherData.CellIndex.x, y = currentTeacherData.CellIndex.y + 1 });
+                        SetCellBackground(worksheet, teacherData.CellIndex, 
+                            new CellIndex { x= teacherData.CellIndex.x, y= teacherData.CellIndex.y + 1}, XlRgbColor.rgbIndianRed);
+                        SetCellBackground(worksheet, currentTeacherData.CellIndex,
+                            new CellIndex { x = currentTeacherData.CellIndex.x, y = currentTeacherData.CellIndex.y + 1 }, XlRgbColor.rgbIndianRed);
                     }
                 }
 
@@ -161,16 +164,17 @@ namespace MYSchedule.ExcelExport
 
             if (prevWeeksList.Intersect(currWeeksList).Any())
             {
-                SetRedBackground(worksheet, cellIndex, new CellIndex {x = cellIndex.x, y = cellIndex.y + 1});
+                SetCellBackground(worksheet, cellIndex, new CellIndex {x = cellIndex.x, y = cellIndex.y + 1}, XlRgbColor.rgbRed);
             }
         }
 
         
-        private static void SetRedBackground(Worksheet worksheet, CellIndex from, CellIndex to)
+        private static void SetCellBackground(Worksheet worksheet, CellIndex from, CellIndex to, XlRgbColor color)
         {
             worksheet.Range[worksheet.Cells[from.x, from.y],
-                worksheet.Cells[to.x, to.y]].Interior.Color = XlRgbColor.rgbRed;
+                worksheet.Cells[to.x, to.y]].Interior.Color = color;
         }
+
         private static void CreateSkeleton(Worksheet worksheet, DataTable dataTable)
         {
             var classRoomNumbers = new HashSet<string>();
@@ -201,15 +205,19 @@ namespace MYSchedule.ExcelExport
         private static void FillClassRooms(Worksheet worksheet)
         {
             var classRoomLength = ClassRooms.Count;
+            int j = 0;
+            var start = 0;
             for (int i = 0; i < 7; i++)
             {
-                var start = 4 + i * classRoomLength;
+                 start = 4 + i * classRoomLength;
 
-                for (int j = 0; j < classRoomLength; j++)
+                for (j = 0; j < classRoomLength; j++)
                 {
                     worksheet.Cells[start + j, 3] = ClassRooms[j];
                 }
             }
+
+            finalXCoord = start + j-1;
         }
 
         private static void InitStyle(Worksheet worksheet)
@@ -217,11 +225,41 @@ namespace MYSchedule.ExcelExport
             string startRange = "A1";
             string endRange = "U500";
             var currentRange = worksheet.Range[startRange, endRange];
-            currentRange.Style.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
-            currentRange.Style.VerticalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
+            currentRange.Style.HorizontalAlignment = XlHAlign.xlHAlignCenter;
+            currentRange.Style.VerticalAlignment = XlHAlign.xlHAlignCenter;
             currentRange.Style.NumberFormat = "@";
 
             // worksheet.Range["C1","C50"].Style.Orientation  = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
+        }
+
+        private static void FinalStyleAdditions(Worksheet worksheet)
+        {
+            var classRoomLength = ClassRooms.Count;
+
+
+
+            worksheet.get_Range("A1", "A1").Cells.Font.Size = 15;
+            worksheet.get_Range("A1", "O3").Cells.Font.Bold = true;
+            worksheet.get_Range("A1", "O3").Cells.Borders.Weight = 2d;
+            worksheet.get_Range("A1", "C"+ finalXCoord).Cells.Borders.Weight = 2d;
+
+            for (int i = 1; i <= 7; i++)
+            {
+                var xCoord = 3 + i*classRoomLength;
+                worksheet.get_Range("A13", "O" + xCoord).Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
+                var yCoord = 5 + i * 2;
+                worksheet.Range[worksheet.Cells[3, yCoord], worksheet.Cells[finalXCoord, yCoord]].Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
+            }
+          
+
+            worksheet.get_Range("O1", "O" + finalXCoord).Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
+
+            worksheet.Range["A1", "U500"].Columns.AutoFit();
+            worksheet.Range["A1", "U500"].Rows.AutoFit();
         }
 
         private static CellIndex GetIndexByDayLessonClassroom(string dayName, int lessonNumber, string classroom)
