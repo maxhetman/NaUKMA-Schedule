@@ -10,6 +10,12 @@ namespace MYSchedule.ExcelExport
 {
     public struct CellIndex
     {
+        public CellIndex(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+
         public int x;
         public int y;
     }
@@ -222,8 +228,6 @@ namespace MYSchedule.ExcelExport
         private static void FinalStyleAdditions(Worksheet worksheet)
         {
             var classRoomLength = ClassRooms.Count;
-
-
 
             worksheet.Range["A1", "A1"].Cells.Font.Size = 15;
             worksheet.Range["A1", "O3"].Cells.Font.Bold = true;

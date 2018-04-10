@@ -9,17 +9,17 @@
 
 
         private const string scheduleForLessonByCourseSpecialtySubject =
-                "Select [W.Number], [W.Begin], [W.End], D.DayName, L.LessonTimePeriod, S.ClassRoomNumber, T.LastName, T.Initials, LT.Type, S.Group From(((((((ScheduleRecord S Inner Join WeekSchedule WS ON S.Id = WS.ScheduleRecordId) Inner Join Teacher T ON S.TeacherId = T.Id) Inner Join [Day] D ON S.DayNumber = D.DayNumber) Inner Join LessonType LT ON S.LessonTypeId = LT.Id) Inner Join [Specialty] SP ON S.SpecialtyId = SP.Id) Inner Join [Week] W ON WS.WeekNumber = W.Number) Inner Join LessonTime L ON S.LessonTimeNumber = L.Number) "
+                "Select [W.Number], D.DayName, L.LessonTimePeriod, S.ClassRoomNumber, T.LastName, T.Initials, LT.Type, S.Group From(((((((ScheduleRecord S Inner Join WeekSchedule WS ON S.Id = WS.ScheduleRecordId) Inner Join Teacher T ON S.TeacherId = T.Id) Inner Join [Day] D ON S.DayNumber = D.DayNumber) Inner Join LessonType LT ON S.LessonTypeId = LT.Id) Inner Join [Specialty] SP ON S.SpecialtyId = SP.Id) Inner Join [Week] W ON WS.WeekNumber = W.Number) Inner Join LessonTime L ON S.LessonTimeNumber = L.Number) "
             ;
 
-        private const string OrderByDayAndLesson = " ORDER BY D.DayNumber, L.Number";
+        private const string OrderByDayLessonClassRoomWeek = " ORDER BY D.DayNumber, L.Number, S.ClassRoomNumber, W.Number";
 
         public static string LessonScheduleByCourseSpecialtySubjectQuery(string specialty, int yearOfStudying, string subject)
         {
             var query = scheduleForLessonByCourseSpecialtySubject;
             query += string.Format("Where SP.Name={0} And S.YearOfStudying={1} And S.Subject={2}", specialty,
                 yearOfStudying, subject);
-            query += OrderByDayAndLesson;
+            query += OrderByDayLessonClassRoomWeek;
             return query;
         }
             public static string ClassRoomsAvailabilityQuery(int? buildingNumber, bool? isComputer,
