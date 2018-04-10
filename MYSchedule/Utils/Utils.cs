@@ -3,11 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Office.Interop.Excel;
 
 namespace MYSchedule.Utils
 {
     public static class Utils
     {
+
+
+        public static void InitCommonStyle(Worksheet worksheet)
+        {
+            string startRange = "A1";
+            string endRange = "U500";
+            var currentRange = worksheet.Range[startRange, endRange];
+            currentRange.Style.HorizontalAlignment = XlHAlign.xlHAlignCenter;
+            currentRange.Style.VerticalAlignment = XlHAlign.xlHAlignCenter;
+            currentRange.Style.NumberFormat = "@";
+
+            // worksheet.Range["C1","C50"].Style.Orientation  = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
+        }
 
         public static List<int> ParseWeeks(string weeks)
         {

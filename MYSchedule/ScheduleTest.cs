@@ -46,13 +46,16 @@ namespace MYSchedule
 
             Console.OutputEncoding = Encoding.UTF8;
             var dt = QueryManager.GetClassRoomsAvailability();
-
-            foreach (DataRow one in dt.Rows)
-            {
-                Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}, {one[5]}");
-            }
-
             ExcelExportManager.ShowAllClassRooms(dt);
+
+            //var dt = QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"МП \"\"Комп`ютерні науки\"\"\"", 1, "\"Англійська мова\"");
+
+            //foreach (DataRow one in dt.Rows)
+            //{
+            //    Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}, {one[5]}");
+            //}
+
+            // ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty(dt);
 
             Console.ReadLine();
 

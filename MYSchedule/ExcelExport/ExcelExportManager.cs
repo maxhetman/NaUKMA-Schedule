@@ -22,7 +22,7 @@ namespace MYSchedule.ExcelExport
         public string DayName;
     }
 
-    class ExcelExportManager
+    public class ExcelExportManager
     {
 
         #region Variables
@@ -50,17 +50,16 @@ namespace MYSchedule.ExcelExport
             excel.Application.Workbooks.Add(true);
             Worksheet worksheet = (Worksheet) excel.ActiveSheet;
 
-            InitStyle(worksheet);
+            Utils.Utils.InitCommonStyle(worksheet);
 
             CreateHeader(worksheet);
             CreateSkeleton(worksheet, dataTable);
             FillClassRooms(worksheet);
             FillTable(dataTable, worksheet);
 
-            excel.Visible = true;
-
             FinalStyleAdditions(worksheet);
-           
+
+            excel.Visible = true;
 
             //   worksheet.Range["B1","B100"].EntireColumn.Style.Orientation = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
             worksheet.Activate();
@@ -220,33 +219,21 @@ namespace MYSchedule.ExcelExport
             finalXCoord = start + j-1;
         }
 
-        private static void InitStyle(Worksheet worksheet)
-        {
-            string startRange = "A1";
-            string endRange = "U500";
-            var currentRange = worksheet.Range[startRange, endRange];
-            currentRange.Style.HorizontalAlignment = XlHAlign.xlHAlignCenter;
-            currentRange.Style.VerticalAlignment = XlHAlign.xlHAlignCenter;
-            currentRange.Style.NumberFormat = "@";
-
-            // worksheet.Range["C1","C50"].Style.Orientation  = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
-        }
-
         private static void FinalStyleAdditions(Worksheet worksheet)
         {
             var classRoomLength = ClassRooms.Count;
 
 
 
-            worksheet.get_Range("A1", "A1").Cells.Font.Size = 15;
-            worksheet.get_Range("A1", "O3").Cells.Font.Bold = true;
-            worksheet.get_Range("A1", "O3").Cells.Borders.Weight = 2d;
-            worksheet.get_Range("A1", "C"+ finalXCoord).Cells.Borders.Weight = 2d;
+            worksheet.Range["A1", "A1"].Cells.Font.Size = 15;
+            worksheet.Range["A1", "O3"].Cells.Font.Bold = true;
+            worksheet.Range["A1", "O3"].Cells.Borders.Weight = 2d;
+            worksheet.Range["A1", "C"+ finalXCoord].Cells.Borders.Weight = 2d;
 
             for (int i = 1; i <= 7; i++)
             {
                 var xCoord = 3 + i*classRoomLength;
-                worksheet.get_Range("A13", "O" + xCoord).Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
+                worksheet.Range["A13", "O" + xCoord].Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
             }
 
             for (int i = 0; i < 6; i++)
@@ -256,7 +243,7 @@ namespace MYSchedule.ExcelExport
             }
           
 
-            worksheet.get_Range("O1", "O" + finalXCoord).Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
+            worksheet.Range["O1", "O" + finalXCoord].Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
 
             worksheet.Range["A1", "U500"].Columns.AutoFit();
             worksheet.Range["A1", "U500"].Rows.AutoFit();

@@ -71,6 +71,7 @@
     <Compile Include="DataAccess\SpecialtyDao.cs" />
     <Compile Include="DataAccess\TeacherDao.cs" />
     <Compile Include="DataAccess\WeekScheduleDao.cs" />
+    <Compile Include="DataAccess\WeeksDao.cs" />
     <Compile Include="DTO\ClassRoomDto.cs" />
     <Compile Include="DTO\LessonTimeDto.cs" />
     <Compile Include="DTO\LessonTypeDto.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="DTO\DayDto.cs" />
     <Compile Include="DTO\WeekDto.cs" />
     <Compile Include="DTO\WeekScheduleDto.cs" />
+    <Compile Include="ExcelExport\ExcelExportLessonByCourseAndSpecialty.cs" />
     <Compile Include="ExcelExport\ExcelExportManager.cs" />
     <Compile Include="ScheduleTest.cs" />
     <Compile Include="Parser\ExcelParser.cs" />
