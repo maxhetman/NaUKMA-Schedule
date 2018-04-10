@@ -22,7 +22,6 @@ namespace MYSchedule.DataAccess
                 dataAdapter.SelectCommand.CommandType = CommandType.Text;
                 dataAdapter.SelectCommand.CommandText = getAllWeeks;
 
-
                 // Fill the datatable From adapter
                 dataAdapter.Fill(dataTable);
                 return dataTable;

@@ -1,0 +1,52 @@
+﻿<Window x:Class="UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI"
+        mc:Ignorable="d"
+        Title="Schedule" MinHeight="328.252" MinWidth="597.646" Width="598.42" Height="346.062">
+    <Grid>
+        <TabControl x:Name="tabControl" VerticalContentAlignment="Bottom" VerticalAlignment="Top" Height="105">
+            <TabItem Header="Методист">
+                <Grid Background="#FFE5E5E5"  Margin="0,0,62,0" Visibility="Visible" Opacity="1">
+                    <ComboBox HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="120">
+                        <ComboBoxItem Name="mquery1">Зайнятість Аудиторій</ComboBoxItem>
+                        <ComboBoxItem Name="mquery2">Розклад на тиждень</ComboBoxItem>
+                    </ComboBox>
+                    <ContentControl Name ="methoditsParamsQuery1" Margin="135,10,64,10">
+                        <Grid ShowGridLines="True">
+                            <CheckBox x:Name="showAllClassroms" Content="Всі аудиторії" Margin="0,22,233,10" VerticalContentAlignment="Center"/>
+                            <StackPanel Height="57" Margin="95,0,0,0" Width="67" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <Label Content="Корпус" />
+                                <ComboBox x:Name="buildings">
+                                </ComboBox>
+                            </StackPanel>
+                            <CheckBox x:Name="showComputerClassrooms" Content="Комп`ютерні" HorizontalAlignment="Left" Margin="167,22,0,0" VerticalAlignment="Top" Height="25" Width="93"/>
+                            <StackPanel HorizontalAlignment="Left" Height="57" Margin="265,0,-58,0" VerticalAlignment="Top" Width="116">
+                                <Label x:Name="label" Content="Номер аудиторії"/>
+                                <ComboBox x:Name="classRoomNumbers"/>
+                            </StackPanel>
+                        </Grid>
+                    </ContentControl>
+
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Викладач">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Студент">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+        </TabControl>
+        <DataGrid x:Name="dataView" ColumnWidth="*" ItemsSource="{Binding}" Margin="10,110,136,10"/>
+        <Button x:Name="exportBtn" Content="Export&#xD;&#xA;" Margin="0,168,23,0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90"/>
+        <Button x:Name="saveBtn" Content="Save&#xD;&#xA;changes&#xD;&#xA;&#xD;&#xA;" HorizontalAlignment="Right" Margin="0,0,23,24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="90" VerticalAlignment="Bottom" Height="52"/>
+        <Button x:Name="searchBtn" Content="Search" HorizontalAlignment="Left" Margin="529,41,0,0" VerticalAlignment="Top" Width="51" Height="46"/>
+
+    </Grid>
+
+
+
+</Window>
