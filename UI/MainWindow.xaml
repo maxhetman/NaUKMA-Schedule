@@ -14,7 +14,7 @@
                         <ComboBoxItem Name="mquery1">Зайнятість Аудиторій</ComboBoxItem>
                         <ComboBoxItem Name="mquery2">Розклад на тиждень</ComboBoxItem>
                     </ComboBox>
-                    <ContentControl Name ="methoditsParamsQuery1" Margin="135,10,64,10">
+                    <ContentControl Name ="methoditsParamsQuery1" Margin="135,10,64,10" Visibility="Collapsed">
                         <Grid ShowGridLines="True">
                             <CheckBox x:Name="showAllClassroms" Content="Всі аудиторії" Margin="0,22,233,10" VerticalContentAlignment="Center"/>
                             <StackPanel Height="57" Margin="95,0,0,0" Width="67" HorizontalAlignment="Left" VerticalAlignment="Top">
@@ -29,7 +29,18 @@
                             </StackPanel>
                         </Grid>
                     </ContentControl>
+                    <ContentControl Name ="methoditsParamsQuery2" Margin="135,10,51,10" Visibility="Collapsed">
+                        <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="336">
+                            <CheckBox x:Name="mquery2AllWeeks" Content="Всі тижні" HorizontalAlignment="Left" Margin="0,27,0,0" VerticalAlignment="Top" Height="20" Width="88"/>
+                            <StackPanel HorizontalAlignment="Left" Height="57" Margin="88,0,0,0" VerticalAlignment="Top" Width="91">
+                                <Label x:Name="label1" Content="Номер тижня"/>
+                                <ComboBox x:Name="mquery2WeekNumber" Height="23" Margin="10,0"/>
+                            </StackPanel>
 
+                        </Grid>
+
+
+                    </ContentControl>
 
                 </Grid>
             </TabItem>
@@ -43,7 +54,7 @@
         <DataGrid x:Name="dataView" ColumnWidth="*" ItemsSource="{Binding}" Margin="10,110,136,10"/>
         <Button x:Name="exportBtn" Content="Export&#xD;&#xA;" Margin="0,168,23,0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90"/>
         <Button x:Name="saveBtn" Content="Save&#xD;&#xA;changes&#xD;&#xA;&#xD;&#xA;" HorizontalAlignment="Right" Margin="0,0,23,24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="90" VerticalAlignment="Bottom" Height="52"/>
-        <Button x:Name="searchBtn" Content="Search" HorizontalAlignment="Left" Margin="529,41,0,0" VerticalAlignment="Top" Width="51" Height="46"/>
+        <Button x:Name="searchBtn" Content="Search" Margin="0,47,10,0" Width="51" Height="46" HorizontalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Top"/>
 
     </Grid>
 

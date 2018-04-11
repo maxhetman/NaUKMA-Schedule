@@ -32,14 +32,42 @@ namespace UI
 
         private void InitializeListeners()
         {
-            mquery1.Selected += MethodistQuery1Selected;
+            MethodistListeners();
             searchBtn.Click += OnSearchBtnClick;
             exportBtn.Click += OnExportBtnClick;
         }
 
+        private void MethodistListeners()
+        {
+            mquery1.Selected += MethodistQuery1Selected;
+            showAllClassroms.Checked += OnShowAllClassroomToggle;
+            showAllClassroms.Unchecked += OnShowAllClassroomToggle;
+
+            mquery2.Selected += MethodistQuery2Selected;
+        }
+
+        private void OnShowAllClassroomToggle(object sender, RoutedEventArgs e)
+        {
+            var isChecked = (bool) showAllClassroms.IsChecked;
+            showComputerClassrooms.IsEnabled = !isChecked;
+            classRoomNumbers.IsEnabled = !isChecked;
+            buildings.IsEnabled = !isChecked;
+        }
+
+        private void MethodistQuery2Selected(object sender, RoutedEventArgs e)
+        {
+            methoditsParamsQuery1.Visibility = Visibility.Collapsed; ;
+            methoditsParamsQuery2.Visibility = Visibility.Visible; ;
+        }
+
+        private void MethodistQuery1Selected(object sender, RoutedEventArgs e)
+        {
+            methoditsParamsQuery1.Visibility = Visibility.Visible; ;
+            methoditsParamsQuery2.Visibility = Visibility.Collapsed; ;
+        }
+
         private void OnExportBtnClick(object sender, RoutedEventArgs e)
         {
-
             if (mquery1.IsSelected)
             {
                 ExcelExportManager.ShowAllClassRooms(GetCurrentData());
@@ -75,6 +103,11 @@ namespace UI
             var isComputer = showComputerClassrooms.IsChecked;
             var classRoomNumber = classRoomNumbers.Text;
 
+            if (isComputer != true)
+            {
+                isComputer = null;
+            }
+
             if ((bool) isShowAll)
             {
                 return QueryManager.GetClassRoomsAvailability();
@@ -94,11 +127,6 @@ namespace UI
             return QueryManager.GetClassRoomsAvailability(buildingNumber: building, isComputer: isComputer);
         }
 
-        private void MethodistQuery1Selected(object sender, RoutedEventArgs e)
-        {
-            methoditsParamsQuery1.Visibility = Visibility.Visible;;
-        }
-
         private void SetDataView(DataTable dataTable)
         {
             dataView.DataContext = dataTable;
@@ -108,7 +136,6 @@ namespace UI
         {
             buildings.ItemsSource = ClassRoomsDao.GetAllBuildings();
             classRoomNumbers.ItemsSource = ClassRoomsDao.GetAllNumbers();
-
         }
     }
 }
