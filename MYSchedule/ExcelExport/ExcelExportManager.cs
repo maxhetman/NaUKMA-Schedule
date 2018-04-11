@@ -113,9 +113,9 @@ namespace MYSchedule.ExcelExport
                         && teacherData.DayName == currentTeacherData.DayName
                         && teacherData.Weeks.Intersect(currentTeacherData.Weeks).Any())
                     {
-                        SetCellBackground(worksheet, teacherData.CellIndex, 
+                        GenericExcelExport.SetCellBackground(worksheet, teacherData.CellIndex, 
                             new CellIndex { x= teacherData.CellIndex.x, y= teacherData.CellIndex.y + 1}, XlRgbColor.rgbIndianRed);
-                        SetCellBackground(worksheet, currentTeacherData.CellIndex,
+                        GenericExcelExport.SetCellBackground(worksheet, currentTeacherData.CellIndex,
                             new CellIndex { x = currentTeacherData.CellIndex.x, y = currentTeacherData.CellIndex.y + 1 }, XlRgbColor.rgbIndianRed);
                     }
                 }
@@ -146,16 +146,10 @@ namespace MYSchedule.ExcelExport
 
             if (prevWeeksList.Intersect(currWeeksList).Any())
             {
-                SetCellBackground(worksheet, cellIndex, new CellIndex {x = cellIndex.x, y = cellIndex.y + 1}, XlRgbColor.rgbRed);
+                GenericExcelExport.SetCellBackground(worksheet, cellIndex, new CellIndex {x = cellIndex.x, y = cellIndex.y + 1}, XlRgbColor.rgbRed);
             }
         }
 
-        
-        private static void SetCellBackground(Worksheet worksheet, CellIndex from, CellIndex to, XlRgbColor color)
-        {
-            worksheet.Range[worksheet.Cells[from.x, from.y],
-                worksheet.Cells[to.x, to.y]].Interior.Color = color;
-        }
 
         private static void CreateSkeleton(Worksheet worksheet, DataTable dataTable)
         {
@@ -196,6 +190,9 @@ namespace MYSchedule.ExcelExport
                 for (j = 0; j < classRoomLength; j++)
                 {
                     worksheet.Cells[start + j, 3] = ClassRooms[j];
+                    if((start + j) % 2 == 0)
+                    worksheet.Range[worksheet.Cells[start + j, 3],
+                        worksheet.Cells[start + j, 15]].Interior.Color = XlRgbColor.rgbLightGray;
                 }
             }
 
@@ -244,6 +241,8 @@ namespace MYSchedule.ExcelExport
 
             worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, 15]].Merge();
             worksheet.Cells[1, 1] = header;
+            worksheet.Range[worksheet.Cells[1, 1],
+                worksheet.Cells[1, 1]].Interior.Color = XlRgbColor.rgbBeige;
 
 
             worksheet.Range[worksheet.Cells[2, 4], worksheet.Cells[2, 5]].Merge();

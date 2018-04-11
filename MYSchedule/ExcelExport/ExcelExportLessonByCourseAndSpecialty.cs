@@ -15,7 +15,8 @@ namespace MYSchedule.ExcelExport
 
         private static Dictionary<string, CellIndex> WeekNumberCellIndex = new Dictionary<string, CellIndex>();
 
-        private static int lastWeekIndex;
+        private static int lastWeekYIndex;
+        private static int lastXIndex;
 
         #endregion
 
@@ -52,7 +53,7 @@ namespace MYSchedule.ExcelExport
                 WeekNumberCellIndex.Add(week[0].ToString(), new CellIndex(3,startIndex));
                 startIndex++;
             }
-            lastWeekIndex = startIndex;
+            lastWeekYIndex = startIndex;
         }
 
         private static string FormattedWeekPeriod(DataRow week)
@@ -69,6 +70,9 @@ namespace MYSchedule.ExcelExport
             worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, 17]].Merge();
             worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[2, 17]].Merge();
             worksheet.Cells[1, 1] = header;
+            worksheet.Range[worksheet.Cells[1, 1],
+                worksheet.Cells[1, 1]].Interior.Color = XlRgbColor.rgbBeige;
+
             worksheet.Cells[2, 1] = "Тижні";
 
             worksheet.Cells[3, 1] = "День\nЧас";
@@ -112,6 +116,10 @@ namespace MYSchedule.ExcelExport
 
                 if (dayTimeWasChanged)
                 {
+                    worksheet.Range[worksheet.Cells[currentDayTimeCell.x, currentDayTimeCell.y],
+                        worksheet.Cells[currentDayTimeCell.x, lastWeekYIndex-1]].Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
+
+                    currentDayTimeCell.x++;
                     worksheet.Cells[currentDayTimeCell.x, currentDayTimeCell.y] = currentDayName + "\n" + currentLessonTime;
                 }
 
@@ -120,20 +128,23 @@ namespace MYSchedule.ExcelExport
 
                 if (currentClassRoom != classRoom)
                 {
+                    worksheet.Range[worksheet.Cells[currentClassRoomCell.x, currentClassRoomCell.y],
+                        worksheet.Cells[currentClassRoomCell.x, lastWeekYIndex-1]].Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
+
+                    if(currentClassRoomCell.x % 2 ==0)
+                    worksheet.Range[worksheet.Cells[currentClassRoomCell.x, currentClassRoomCell.y],
+                        worksheet.Cells[currentClassRoomCell.x, lastWeekYIndex - 1]].Interior.Color = XlRgbColor.rgbLightGray;
+
                     currentClassRoom = classRoom;
                     worksheet.Cells[currentClassRoomCell.x, currentClassRoomCell.y] = currentClassRoom;
                     currentClassRoomCell.x++;
 
-                    // if datTime Cell was not changed we need to merge cells
+                    // if dayTime Cell was not changed we need to merge cells
                     if (!dayTimeWasChanged)
                     {
-                        // var previousXCoord = currentDayTimeCell.x - 1;
-                        worksheet.Range[worksheet.Cells[currentDayTimeCell.x - 1, currentDayTimeCell.y],
+                         var previousXCoord = currentDayTimeCell.x - 1;
+                        worksheet.Range[worksheet.Cells[previousXCoord, currentDayTimeCell.y],
                             worksheet.Cells[currentDayTimeCell.x++, currentDayTimeCell.y]].Merge();
-                    }
-                    else
-                    {
-                        currentDayTimeCell.x++;
                     }
                 }
 
@@ -144,6 +155,7 @@ namespace MYSchedule.ExcelExport
                 {
                     currerntTeacher = teacher;
                     worksheet.Cells[currentTeacherCell.x, currentTeacherCell.y] = currerntTeacher;
+                    lastXIndex = currentTeacherCell.x;
                     currentTeacherCell.x++;
                 }
 
@@ -153,7 +165,7 @@ namespace MYSchedule.ExcelExport
 
                 worksheet.Cells[weekXCoord, weekYCoord] = dataRow[6].ToString() + dataRow[7].ToString();
 
-                Console.WriteLine($"{dataRow[0]}, {dataRow[1]}, {dataRow[2]}, {dataRow[3]}, {dataRow[4]}, {dataRow[5]}, {dataRow[6]}");
+               // Console.WriteLine($"{dataRow[0]}, {dataRow[1]}, {dataRow[2]}, {dataRow[3]}, {dataRow[4]}, {dataRow[5]}, {dataRow[6]}");
 
                 dayTimeWasChanged = false;
             }
@@ -162,23 +174,33 @@ namespace MYSchedule.ExcelExport
         private static void FinalStyleAdditions(Worksheet worksheet)
         {
             worksheet.Range["A1", "A1"].Cells.Font.Size = 15;
+            worksheet.Range["A2", "A2"].Cells.Font.Size = 12;
             worksheet.Range["A1", "Q3"].Cells.Font.Bold = true;
             worksheet.Range["A1", "Q3"].Cells.Borders.Weight = 2d;
 
-            //for (int i = 1; i <= 7; i++)
-            //{
-            //    var xCoord = 3 + i * classRoomLength;
-            //    worksheet.Range["A13", "O" + xCoord].Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
-            //}
+            for (int i = 1; i < lastWeekYIndex; i++)
+            {
+                worksheet.Range[worksheet.Cells[3, i], worksheet.Cells[lastXIndex, i]].Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
+            }
 
-            //for (int i = 0; i < 6; i++)
-            //{
-            //    var yCoord = 5 + i * 2;
-            //    worksheet.Range[worksheet.Cells[3, yCoord], worksheet.Cells[finalXCoord, yCoord]].Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
-            //}
+            worksheet.Range[worksheet.Cells[3, 4],
+                worksheet.Cells[3, lastWeekYIndex - 1]].Interior.Color = XlRgbColor.rgbAntiqueWhite;
 
             worksheet.Range["A1", "U500"].Columns.AutoFit();
             worksheet.Range["A1", "U500"].Rows.AutoFit();
+            worksheet.Columns[1].ColumnWidth = 14;
+            worksheet.Columns[2].ColumnWidth = 10;
+
+            for (int i = 4; i < 8; i++)
+            {
+                worksheet.Rows[i].RowHeight= 20;
+            }
+
+            for (int i = 4; i < lastWeekYIndex; i++)
+            {
+                worksheet.Columns[i].ColumnWidth= 9;
+            }
+
         }
         #endregion
     }

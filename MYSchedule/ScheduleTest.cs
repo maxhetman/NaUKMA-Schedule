@@ -54,7 +54,7 @@ namespace MYSchedule
 
             //var headers = new[] { "Number", "DayName", "LessonTimePeriod", "ClassRoomNumber", "LastName", "Initials", "Type", "Group" };
             //GenericExcelExport.Export(headers, dt);
-           // Console.WriteLine("ROWS : " + dt.Rows.Count + " COLS : " + dt.Columns.Count);
+            // Console.WriteLine("ROWS : " + dt.Rows.Count + " COLS : " + dt.Columns.Count);
             //foreach (DataRow one in dt.Rows)
             //{
             //    Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}, {one[5]}");
@@ -62,7 +62,7 @@ namespace MYSchedule
 
 
 
-            Console.ReadLine();
+            // Console.ReadLine();
 
             //fileName = @"E:\kek.mdb";
             //var kek = DataBaseCreator.CreateNewAccessDatabase(fileName);

@@ -27,6 +27,12 @@ namespace MYSchedule.ExcelExport
             worksheet.Activate();
         }
 
+        public static void SetCellBackground(Worksheet worksheet, CellIndex from, CellIndex to, XlRgbColor color)
+        {
+            worksheet.Range[worksheet.Cells[from.x, from.y],
+                worksheet.Cells[to.x, to.y]].Interior.Color = color;
+        }
+
         private static void FinalStyleAdditions(Worksheet worksheet, string[] columnNames, DataTable dataTable)
         {
 
