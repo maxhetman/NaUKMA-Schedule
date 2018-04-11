@@ -16,16 +16,20 @@ namespace MYSchedule.DataAccess
             
             DataTable DT = Access2Dt(query);
 
-            if (DT == null || DT.Rows.Count < 1) throw new Exception("Data not found");
-            else return DT;
+            if (DT == null) return new DataTable();
+
+            return DT;
         }
 
         public static DataTable GetScheduleBySubjectSpecialtyAndCourse(string specialty, int course, string subject)
         {
             string query = Queries.LessonScheduleByCourseSpecialtySubjectQuery(specialty, course, subject);
+
             DataTable DT = Access2Dt(query);
-            if (DT == null || DT.Rows.Count < 1) throw new Exception("Data not found");
-            else return DT;
+
+            if (DT == null) return new DataTable();
+
+            return DT;
         }
 
         private static DataTable Access2Dt(string query)

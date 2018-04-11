@@ -44,7 +44,7 @@
 
             if (classroomNumber != null)
             {
-                query += "Where Number = " + classroomNumber;
+                query += "Where C.Number = \"" + classroomNumber + "\"";
             }
 
             query += OrderByLessonTimeClassRoom;

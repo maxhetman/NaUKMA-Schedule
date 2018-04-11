@@ -20,9 +20,9 @@ namespace MYSchedule.Parser
         private static Dictionary<ScheduleRecordDto, List<int>> _weekScheduleRecords =
             new Dictionary<ScheduleRecordDto, List<int>>();
 
-        public static Dictionary<ScheduleRecordDto, List<int>> GetScheduleFromExcel()
+        public static Dictionary<ScheduleRecordDto, List<int>> GetScheduleFromExcel(string filePath)
         {
-            var excel = new ExcelQueryFactory(@"E:\TestExcel.xlsx");
+            var excel = new ExcelQueryFactory(filePath);
     
 
             var rows = from c in excel.Worksheet(0)  // getting first worksheet
@@ -179,16 +179,7 @@ namespace MYSchedule.Parser
                 }
             }
 
-
-            //var dataArr = teacherData.Trim().Split(' ');
-            //var lastName = dataArr[dataArr.Length - 1].Trim();
-            //var initials = dataArr[dataArr.Length - 2].Trim();
-            //var position = "";
-
-            //for (int i = 0; i < dataArr.Length - 2; i++)
-            //{
-            //    position += dataArr[i];
-            //}
+            position = GetUnifiedPosition(position);
 
             return new TeacherDto
             {
@@ -198,6 +189,25 @@ namespace MYSchedule.Parser
             };
         }
 
+        private static string GetUnifiedPosition(string positionStr)
+        {
+            if (positionStr.Contains("ст") && positionStr.Contains("викл"))
+            {
+                return "ст. викл.";
+            }
+
+            if (positionStr.Contains("ас") || positionStr.Contains("ac"))
+            {
+                return "ас.";
+            }
+
+            if (positionStr.Contains("доц"))
+            {
+                return "доц";
+            }
+
+            return positionStr;
+        }
     }
 
 

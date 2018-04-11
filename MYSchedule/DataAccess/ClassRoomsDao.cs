@@ -5,7 +5,6 @@ namespace MYSchedule.DataAccess
 {
     public static class ClassRoomsDao
     {
-        //todo: distinct must not be here. fix this shit
         private const string GetAllBuildingsQuery = "Select DISTINCT Building FROM ClassRoom";
         private const string GetAllNumbersQuery = "Select Number FROM ClassRoom";
 

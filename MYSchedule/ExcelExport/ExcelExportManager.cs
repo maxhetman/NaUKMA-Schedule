@@ -190,9 +190,6 @@ namespace MYSchedule.ExcelExport
                 for (j = 0; j < classRoomLength; j++)
                 {
                     worksheet.Cells[start + j, 3] = ClassRooms[j];
-                    if((start + j) % 2 == 0)
-                    worksheet.Range[worksheet.Cells[start + j, 3],
-                        worksheet.Cells[start + j, 15]].Interior.Color = XlRgbColor.rgbLightGray;
                 }
             }
 
