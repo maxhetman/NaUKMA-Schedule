@@ -71,29 +71,6 @@ namespace MYSchedule.ExcelExport
             worksheet.Activate();
         }
 
-       
-
-
-        public static void SpecialityYearLesson(DataTable dataTable)
-        {
-            //var table = QueryManager.GetClassRoomsAvailability();
-
-            //Application excel = new Application();
-
-            //excel.Application.Workbooks.Add(true);
-
-            //InitStyle(excel);
-
-
-            //CreateShowClassRoomsExcelHeader(excel);
-            //CreateShowAllClassRoomsExcelSkeleton(excel, table);
-
-
-            //excel.Visible = true;
-            //Worksheet worksheet = (Worksheet)excel.ActiveSheet;
-            //worksheet.Activate();
-        }
-
         #region Helpers
 
         private static void FillTable(DataTable dataTable, Worksheet worksheet)

@@ -50,10 +50,10 @@ namespace MYSchedule
             //ExcelExportManager.ShowAllClassRooms(dt);
 
             var dt = QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"МП \"\"Комп`ютерні науки\"\"\"", 1, "\"Англійська мова\"");
-         //   ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty(dt);
+            ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty(dt);
 
-            var headers = new[] { "Number", "DayName", "LessonTimePeriod", "ClassRoomNumber", "LastName", "Initials", "Type", "Group" };
-            GenericExcelExport.Export(headers, dt);
+            //var headers = new[] { "Number", "DayName", "LessonTimePeriod", "ClassRoomNumber", "LastName", "Initials", "Type", "Group" };
+            //GenericExcelExport.Export(headers, dt);
            // Console.WriteLine("ROWS : " + dt.Rows.Count + " COLS : " + dt.Columns.Count);
             //foreach (DataRow one in dt.Rows)
             //{

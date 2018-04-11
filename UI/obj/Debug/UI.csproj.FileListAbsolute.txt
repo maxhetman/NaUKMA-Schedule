@@ -21,3 +21,18 @@ C:\Users\maxxh\OneDrive\Documents\Visual Studio 2017\Projects\MYSchedule\UI\bin\
 C:\Users\maxxh\OneDrive\Documents\Visual Studio 2017\Projects\MYSchedule\MYSchedule\bin\Debug\UI.exe.config
 C:\Users\maxxh\OneDrive\Documents\Visual Studio 2017\Projects\MYSchedule\MYSchedule\bin\Debug\UI.exe
 C:\Users\maxxh\OneDrive\Documents\Visual Studio 2017\Projects\MYSchedule\MYSchedule\bin\Debug\UI.pdb
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\MYSchedule\bin\Debug\UI.exe.config
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\MYSchedule\bin\Debug\UI.exe
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\MYSchedule\bin\Debug\UI.pdb
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.csprojResolveAssemblyReference.cache
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\MainWindow.g.cs
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\App.g.cs
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI_MarkupCompile.cache
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI_MarkupCompile.lref
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\MainWindow.baml
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.g.resources
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.Properties.Resources.resources
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.csproj.GenerateResource.Cache
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.csproj.CoreCompileInputs.cache
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.exe
+C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.pdb
