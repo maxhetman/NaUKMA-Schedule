@@ -15,6 +15,8 @@ namespace MYSchedule.ExcelExport
 
         private static Dictionary<string, CellIndex> WeekNumberCellIndex = new Dictionary<string, CellIndex>();
 
+        private static int lastWeekIndex;
+
         #endregion
 
         public static void LessonScheduleByCourseAndSpecialty
@@ -50,6 +52,7 @@ namespace MYSchedule.ExcelExport
                 WeekNumberCellIndex.Add(week[0].ToString(), new CellIndex(3,startIndex));
                 startIndex++;
             }
+            lastWeekIndex = startIndex;
         }
 
         private static string FormattedWeekPeriod(DataRow week)
@@ -68,9 +71,6 @@ namespace MYSchedule.ExcelExport
             worksheet.Cells[1, 1] = header;
             worksheet.Cells[2, 1] = "Тижні";
 
-
-
-
             worksheet.Cells[3, 1] = "День\nЧас";
             worksheet.Cells[3, 2] = "Ауд.";
             worksheet.Cells[3, 3] = "Викладач";
@@ -78,9 +78,84 @@ namespace MYSchedule.ExcelExport
 
         private static void FillData(Worksheet worksheet, DataTable dataTable)
         {
-            foreach (DataRow one in dataTable.Rows)
+            var currentDayName = string.Empty;
+            int currentLessonTimeNumber=-1;
+            string currentLessonTime = string.Empty;
+            var currentDayTimeCell = new CellIndex(4, 1);
+
+
+            string currentClassRoom = string.Empty;
+            var currentClassRoomCell = new CellIndex(4, 2);
+
+
+            string currerntTeacher = string.Empty;
+            var currentTeacherCell = new CellIndex(4, 3);
+
+            foreach (DataRow dataRow in dataTable.Rows)
             {
-                Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}, {one[5]}, {one[6]}");
+                var dayTimeWasChanged = false;
+                var dayName = dataRow[1].ToString();
+                var lessonTimeNumber = int.Parse(dataRow[2].ToString());
+
+                if (string.IsNullOrEmpty(currentDayName) || currentDayName != dayName)
+                {
+                    dayTimeWasChanged = true;
+                    currentDayName = dayName;
+                }
+
+                if (currentLessonTimeNumber != lessonTimeNumber)
+                {
+                    dayTimeWasChanged = true;
+                    currentLessonTimeNumber = lessonTimeNumber;
+                    currentLessonTime = LessonTimeDto.GetPeriodFromNumber(lessonTimeNumber);
+                }
+
+                if (dayTimeWasChanged)
+                {
+                    worksheet.Cells[currentDayTimeCell.x, currentDayTimeCell.y] = currentDayName + "\n" + currentLessonTime;
+                }
+
+
+                var classRoom = dataRow[3].ToString();
+
+                if (currentClassRoom != classRoom)
+                {
+                    currentClassRoom = classRoom;
+                    worksheet.Cells[currentClassRoomCell.x, currentClassRoomCell.y] = currentClassRoom;
+                    currentClassRoomCell.x++;
+
+                    // if datTime Cell was not changed we need to merge cells
+                    if (!dayTimeWasChanged)
+                    {
+                        // var previousXCoord = currentDayTimeCell.x - 1;
+                        worksheet.Range[worksheet.Cells[currentDayTimeCell.x - 1, currentDayTimeCell.y],
+                            worksheet.Cells[currentDayTimeCell.x++, currentDayTimeCell.y]].Merge();
+                    }
+                    else
+                    {
+                        currentDayTimeCell.x++;
+                    }
+                }
+
+                var teacher = dataRow[4].ToString()+ " " + dataRow[5].ToString();
+
+
+                if (currerntTeacher != teacher)
+                {
+                    currerntTeacher = teacher;
+                    worksheet.Cells[currentTeacherCell.x, currentTeacherCell.y] = currerntTeacher;
+                    currentTeacherCell.x++;
+                }
+
+                var weekNumber = dataRow[0].ToString();
+                var weekXCoord = currentTeacherCell.x-1;
+                var weekYCoord = WeekNumberCellIndex[weekNumber].y;
+
+                worksheet.Cells[weekXCoord, weekYCoord] = dataRow[6].ToString() + dataRow[7].ToString();
+
+                Console.WriteLine($"{dataRow[0]}, {dataRow[1]}, {dataRow[2]}, {dataRow[3]}, {dataRow[4]}, {dataRow[5]}, {dataRow[6]}");
+
+                dayTimeWasChanged = false;
             }
         }
 
