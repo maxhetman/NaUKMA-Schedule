@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Office.Interop.Excel;
+using DataTable = System.Data.DataTable;
 
 namespace MYSchedule.Utils
 {
@@ -52,6 +53,16 @@ namespace MYSchedule.Utils
                 }
             }
             return weeksList;
+        }
+
+        public static string[] GetColumnNames(DataTable dataTable)
+        {
+            string[] res = new string[dataTable.Columns.Count];
+            for (int i = 0; i < dataTable.Columns.Count; i++)
+            {
+                res[i] = dataTable.Columns[i].ColumnName.ToString();
+            }
+            return res;
         }
     }
 }

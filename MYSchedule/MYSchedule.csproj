@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="DataAccess\ClassRoomsDao.cs" />
     <Compile Include="DataAccess\ConnectionConfig.cs" />
+    <Compile Include="DataAccess\DBAccessManager.cs" />
     <Compile Include="DataAccess\QueryManager.cs" />
     <Compile Include="DataAccess\Queries.cs" />
     <Compile Include="DataAccess\ScheduleRecordDao.cs" />

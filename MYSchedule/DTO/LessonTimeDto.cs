@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MYSchedule.Utils;
 
 namespace MYSchedule.DTO
@@ -32,7 +33,7 @@ namespace MYSchedule.DTO
 
         public static int GetNumberFromPeriod(string period)
         {
-            period = period.Replace(" ", String.Empty);
+            period = period.Replace(" ", String.Empty).Replace(".", ":");
 
             foreach (KeyValuePair<int, string> entry in LessonTimeToNumber)
             {

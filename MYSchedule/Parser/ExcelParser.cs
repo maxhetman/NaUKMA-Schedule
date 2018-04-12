@@ -72,20 +72,21 @@ namespace MYSchedule.Parser
             try
             {
                 string subject = row[2].Value.ToString();
+                TeacherDto teacher = GetTeacherData(row[3].Value.ToString());
+                ClassRoomDto classRoom = new ClassRoomDto { Number = row[6].Value.ToString().Replace(" ", String.Empty) };
 
-                if (string.IsNullOrEmpty(subject))
+                var weeksString = row[5].Value.ToString();
+
+                if (string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(teacher.LastName)
+                    || string.IsNullOrEmpty(classRoom.Number)
+                    || string.IsNullOrEmpty(weeksString))
                     return;
 
                 LessonTimeDto lessonTime = new LessonTimeDto {Number = LessonTimeDto.GetNumberFromPeriod(time)};
-                TeacherDto teacher = GetTeacherData(row[3].Value.ToString());
 
                 int groupCheck;
                 int.TryParse(row[4].Value.ToString(), out groupCheck);
                 int? group = groupCheck > 0 ? (int?) groupCheck : null; //group == null if lesson type is lecture
-
-                var weeksString = row[5].Value.ToString();
-
-                ClassRoomDto classRoom = new ClassRoomDto {Number = row[6].Value.ToString().Replace(" ", String.Empty)};
                 
                 LessonTypeDto lessonType = new LessonTypeDto();
                 lessonType.Id = LessonTypeDto.GetIdByType(group == null ? LessonType.Lecture : LessonType.Practice);

@@ -27,46 +27,53 @@ namespace MYSchedule.DataAccess
             {
                 return false;
             }
-
-            using (OleDbCommand oleDbCommand = new OleDbCommand())
+            try
             {
-                // Set the command object properties
-                oleDbCommand.Connection = new OleDbConnection(ConnectionConfig.ConnectionString);
-                oleDbCommand.CommandType = CommandType.Text;
-                oleDbCommand.CommandText = insertScheduleRecord;
-
-                // Add the input parameters to the parameter collection
-                oleDbCommand.Parameters.AddWithValue("@Id", scheduleRecord.Id);
-                oleDbCommand.Parameters.AddWithValue("@YearOfStudying", scheduleRecord.YearOfStudying);
-                oleDbCommand.Parameters.AddWithValue("@Subject", scheduleRecord.Subject);
-                oleDbCommand.Parameters.AddWithValue("@LessonTypeId", scheduleRecord.LessonType.Id);
-                if (scheduleRecord.Group == null)
+                using (OleDbCommand oleDbCommand = new OleDbCommand())
                 {
-                    oleDbCommand.Parameters.AddWithValue("@Group", DBNull.Value);
-                }
-                else
-                {
-                    oleDbCommand.Parameters.AddWithValue("@Group", scheduleRecord.Group);
-                }
-                oleDbCommand.Parameters.AddWithValue("@TeacherId", teacherId);
-                oleDbCommand.Parameters.AddWithValue("@DayNumber", scheduleRecord.Day.DayNumber);
-                oleDbCommand.Parameters.AddWithValue("@ClassRoomNumber", scheduleRecord.ClassRoom.Number);
-                oleDbCommand.Parameters.AddWithValue("@LessonTimeNumber", scheduleRecord.LessonTime.Number);
-                oleDbCommand.Parameters.AddWithValue("@SpecialtyId", specialtyId);
-                oleDbCommand.Parameters.AddWithValue("@Weeks", scheduleRecord.Weeks);
+                    // Set the command object properties
+                    oleDbCommand.Connection = new OleDbConnection(ConnectionConfig.ConnectionString);
+                    oleDbCommand.CommandType = CommandType.Text;
+                    oleDbCommand.CommandText = insertScheduleRecord;
 
-                // Open the connection, execute the query and close the connection
-                oleDbCommand.Connection.Open();
-                var rowsAffected = oleDbCommand.ExecuteNonQuery();
-                
-                oleDbCommand.Connection.Close();
+                    // Add the input parameters to the parameter collection
+                    oleDbCommand.Parameters.AddWithValue("@Id", scheduleRecord.Id);
+                    oleDbCommand.Parameters.AddWithValue("@YearOfStudying", scheduleRecord.YearOfStudying);
+                    oleDbCommand.Parameters.AddWithValue("@Subject", scheduleRecord.Subject);
+                    oleDbCommand.Parameters.AddWithValue("@LessonTypeId", scheduleRecord.LessonType.Id);
+                    if (scheduleRecord.Group == null)
+                    {
+                        oleDbCommand.Parameters.AddWithValue("@Group", DBNull.Value);
+                    }
+                    else
+                    {
+                        oleDbCommand.Parameters.AddWithValue("@Group", scheduleRecord.Group);
+                    }
+                    oleDbCommand.Parameters.AddWithValue("@TeacherId", teacherId);
+                    oleDbCommand.Parameters.AddWithValue("@DayNumber", scheduleRecord.Day.DayNumber);
+                    oleDbCommand.Parameters.AddWithValue("@ClassRoomNumber", scheduleRecord.ClassRoom.Number);
+                    oleDbCommand.Parameters.AddWithValue("@LessonTimeNumber", scheduleRecord.LessonTime.Number);
+                    oleDbCommand.Parameters.AddWithValue("@SpecialtyId", specialtyId);
+                    oleDbCommand.Parameters.AddWithValue("@Weeks", scheduleRecord.Weeks);
 
-                if (rowsAffected > 0)
-                {
-                    return true;
+                    // Open the connection, execute the query and close the connection
+                    oleDbCommand.Connection.Open();
+                    var rowsAffected = oleDbCommand.ExecuteNonQuery();
+
+                    oleDbCommand.Connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        return true;
+                    }
+
+                    Logger.LogException("Could not add schedule record");
+                    return false;
                 }
-                
-                Logger.LogException("Could not add schedule record");
+            }
+            catch (OleDbException ex)
+            {
+                Logger.LogException(ex);
                 return false;
             }
         }

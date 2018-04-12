@@ -20,6 +20,7 @@ using MYSchedule.DataAccess;
 using MYSchedule.DTO;
 using MYSchedule.ExcelExport;
 using MYSchedule.Parser;
+using MYSchedule.Utils;
 
 namespace UI
 {
@@ -35,7 +36,7 @@ namespace UI
         {
             InitializeComponent();
             InitLoader();
-            FillInfo();
+            FillDropDownsInfo();
             InitializeListeners();
         }
 
@@ -48,18 +49,70 @@ namespace UI
         private void InitializeListeners()
         {
             MethodistListeners();
+            SettingsListeners();
             searchBtn.Click += OnSearchBtnClick;
             exportBtn.Click += OnExportBtnClick;
+            clearDbButton.Click += OnClearDbClick;
+        }
+
+        private void SettingsListeners()
+        {
+            weekDateSelector.SelectedDateChanged += OnFirstWeekDateChanged;
+        }
+
+        private void OnFirstWeekDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedDate = weekDateSelector.SelectedDate;
+
+            if (selectedDate.Value.DayOfWeek != DayOfWeek.Monday)
+            {
+                ShowPopup("Перший день має бути понеділок!");
+                return;
+            }
+
+            WeeksDao.SetFirstWeekDate((DateTime) weekDateSelector.SelectedDate);
+        }
+
+        private void OnClearDbClick(object sender, RoutedEventArgs e)
+        {
+            DBAccessManager.ClearDataBase();
         }
 
         private void MethodistListeners()
         {
             mquery1.Selected += MethodistQuery1Selected;
+            mquery1reset.Click += OnMQuery1Reset;
             showAllClassroms.Checked += OnShowAllClassroomToggle;
             showAllClassroms.Unchecked += OnShowAllClassroomToggle;
             classRoomNumbers.SelectionChanged += OnClassRoomNumbersSelectionChanged;
             buildings.SelectionChanged += OnBuildingsSelectionChanged;
             mquery2.Selected += MethodistQuery2Selected;
+
+            //consistensy check
+            classroomConsistensy.Selected += CheckClassRoomConsistensy;
+            teacherConsistensy.Selected += CheckTeacherConsistensy;
+        }
+
+        private void CheckTeacherConsistensy(object sender, RoutedEventArgs e)
+        {
+            mQueries.SelectedIndex = -1;
+            var inconsistentData = DBAccessManager.GetInconsistentTeachers();
+            SetDataView(inconsistentData);
+        }
+
+        private void CheckClassRoomConsistensy(object sender, RoutedEventArgs e)
+        {
+            mQueries.SelectedIndex = -1;
+            var inconsistentData = DBAccessManager.GetInconsistentClassrooms();
+            SetDataView(inconsistentData);
+        }
+
+        private void OnMQuery1Reset(object sender, RoutedEventArgs e)
+        {
+            classRoomNumbers.SelectedIndex = -1;
+            showComputerClassrooms.IsChecked = false;
+            buildings.SelectedIndex = -1;
+            showAllClassroms.IsChecked = false;
         }
 
         private void OnBuildingsSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -92,8 +145,8 @@ namespace UI
 
         private void MethodistQuery2Selected(object sender, RoutedEventArgs e)
         {
-            methoditsParamsQuery1.Visibility = Visibility.Collapsed; ;
-            methoditsParamsQuery2.Visibility = Visibility.Visible; ;
+            methoditsParamsQuery1.Visibility = Visibility.Collapsed; 
+            methoditsParamsQuery2.Visibility = Visibility.Visible;
         }
 
         private void SetUiState(bool state)
@@ -111,8 +164,8 @@ namespace UI
 
         private void MethodistQuery1Selected(object sender, RoutedEventArgs e)
         {
-            methoditsParamsQuery1.Visibility = Visibility.Visible; ;
-            methoditsParamsQuery2.Visibility = Visibility.Collapsed; ;
+            methoditsParamsQuery1.Visibility = Visibility.Visible; 
+            methoditsParamsQuery2.Visibility = Visibility.Collapsed;
         }
 
         private void OnExportBtnClick(object sender, RoutedEventArgs e)
@@ -121,6 +174,12 @@ namespace UI
             {
                 ExcelExportManager.ShowAllClassRooms(GetCurrentData());
             }
+            else
+            {
+                var dataTable = ((DataView) dataView.ItemsSource).ToTable();
+                GenericExcelExport.Export(Utils.GetColumnNames(dataTable), dataTable);
+            }
+
         }
 
         private void OnSearchBtnClick(object sender, RoutedEventArgs e)
@@ -178,7 +237,7 @@ namespace UI
             dataView.DataContext = dataTable;
         }
 
-        private void FillInfo()
+        private void FillDropDownsInfo()
         {
             buildings.ItemsSource = ClassRoomsDao.GetAllBuildings();
             classRoomNumbers.ItemsSource = ClassRoomsDao.GetAllNumbers();
@@ -226,6 +285,10 @@ namespace UI
 
                     foreach (var weekNumber in entry.Value)
                     {
+                        //TSR
+                        if (weekNumber == 8)
+                            continue;
+
                         WeekScheduleDao.AddWeekSchedule(weekNumber: weekNumber, scheduleRecordId: entry.Key.Id);
                     }
                 }
@@ -235,13 +298,10 @@ namespace UI
         private void worker_RunWorkerCompleted(object sender,
             RunWorkerCompletedEventArgs e)
         {
+            FillDropDownsInfo();
             loader.Visibility = Visibility.Hidden;
             SetUiState(true);
         }
 
-        private static void ParseExcelFiles(string[] fileNames)
-        {
-           
-        }
     }
 }

@@ -6,28 +6,30 @@
         xmlns:local="clr-namespace:UI"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
-        Title="Schedule" MinHeight="328.252" MinWidth="597.646" Width="598.42" Height="346.062">
+        Title="Schedule" MinHeight="328.252" MinWidth="597.646" Width="824.42" Height="516.062">
     <Grid Name="mainGrid">
         <TabControl x:Name="tabControl" VerticalContentAlignment="Bottom" VerticalAlignment="Top" Height="105">
             <TabItem Header="Методист">
                 <Grid Background="#FFE5E5E5"  Margin="0,0,62,0" Visibility="Visible" Opacity="1">
-                    <ComboBox HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="120">
+                    <ComboBox Name="mQueries" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="120">
                         <ComboBoxItem Name="mquery1" IsSelected="True">Зайнятість Аудиторій</ComboBoxItem>
                         <ComboBoxItem Name="mquery2">Розклад на тиждень</ComboBoxItem>
                     </ComboBox>
                     <ContentControl Name ="methoditsParamsQuery1" Margin="135,10,64,10">
-                        <Grid ShowGridLines="True">
-                            <CheckBox x:Name="showAllClassroms" Content="Всі аудиторії" Margin="0,22,233,10" VerticalContentAlignment="Center"/>
-                            <StackPanel Height="57" Margin="95,0,0,0" Width="67" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <Grid ShowGridLines="True" Margin="0,0,-41,0">
+                            <CheckBox x:Name="showAllClassroms" Content="Всі аудиторії" Margin="0,5,500,27" VerticalContentAlignment="Center"/>
+                            <StackPanel Height="57" Margin="100,0,0,0" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top">
                                 <Label Content="Корпус" />
                                 <ComboBox x:Name="buildings">
                                 </ComboBox>
                             </StackPanel>
-                            <CheckBox x:Name="showComputerClassrooms" Content="Комп`ютерні" HorizontalAlignment="Left" Margin="167,22,0,0" VerticalAlignment="Top" Height="25" Width="93"/>
-                            <StackPanel HorizontalAlignment="Left" Height="57" Margin="265,0,-58,0" VerticalAlignment="Top" Width="116">
+                            <CheckBox x:Name="showComputerClassrooms" Content="Комп`ютерні" HorizontalAlignment="Left" Margin="0,30,0,0" VerticalAlignment="Top" Height="25" Width="93"/>
+                            <StackPanel HorizontalAlignment="Left" Height="57" Margin="183,0,0,0" VerticalAlignment="Top" Width="119">
                                 <Label x:Name="label" Content="Номер аудиторії"/>
                                 <ComboBox x:Name="classRoomNumbers"/>
                             </StackPanel>
+                            <Button x:Name="mquery1reset" Content="Скинути &#xD;&#xA;фільтри" HorizontalAlignment="Left" Margin="307,10,0,0" VerticalAlignment="Top" Width="72" Height="37"/>
+
                         </Grid>
                     </ContentControl>
                     <ContentControl Name ="methoditsParamsQuery2" Margin="135,10,51,10" Visibility="Collapsed">
@@ -42,6 +44,11 @@
 
 
                     </ContentControl>
+                    <ComboBox x:Name="comboBox" HorizontalAlignment="Left" Margin="583,41,0,0" VerticalAlignment="Top" Width="116" Height="26">
+                        <ComboBoxItem Name="classroomConsistensy" Content="Аудиторія"/>
+                        <ComboBoxItem Name="teacherConsistensy" Content="Вчитель"/>
+                    </ComboBox>
+                    <Label x:Name="label2" Content="Перевірка &#xD;&#xA;на несуперечливість" HorizontalAlignment="Left" Margin="583,0,0,0" VerticalAlignment="Top" Width="137"/>
 
                 </Grid>
             </TabItem>
@@ -51,15 +58,23 @@
             <TabItem Header="Студент">
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
+            <TabItem Header="Налаштування" Margin="536,0,-540,0" VerticalAlignment="Top" HorizontalAlignment="Right"  >
+                <Grid Background="#FFE5E5E5">
+                    <DatePicker Name="weekDateSelector" HorizontalAlignment="Left" Margin="158,24,0,0" VerticalAlignment="Top" Height="31" Width="134"/>
+                    <Label x:Name="label3" Content="Виберіть дату початку&#xD;&#xA;першого тижня:" HorizontalAlignment="Left" Margin="10,14,0,0" VerticalAlignment="Top" Width="134" Height="41"/>
+
+                </Grid>
+
+            </TabItem>
         </TabControl>
         <DataGrid x:Name="dataView" ColumnWidth="*" ItemsSource="{Binding}" Margin="10,110,136,10"/>
         <Grid Name="loader" Margin="20" Visibility="Collapsed">
             <fa:ImageAwesome Icon="Spinner"  Spin="True" Height="48" Width="48" />
         </Grid>
-        <Button x:Name="exportBtn" Content="Export&#xD;&#xA;" Margin="0,180,23,0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90"/>
-        <Button x:Name="saveBtn" Content="Save&#xD;&#xA;changes&#xD;&#xA;&#xD;&#xA;" HorizontalAlignment="Right" Margin="0,0,23,24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="90" VerticalAlignment="Bottom" Height="52"/>
+        <Button x:Name="exportBtn" Background="LightGreen" Foreground="Navy" Content="Export&#xD;&#xA;" Margin="0,180,23,0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90" Height="45" FontWeight="Bold"/>
         <Button x:Name="searchBtn" Content="Search" Margin="0,47,10,0" Width="51" Height="46" HorizontalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Top"/>
-        <Button x:Name="addExcelBtn" Content="Завантажити &#xD;&#xA;розклад&#xA;" HorizontalAlignment="Right" Margin="0,121,23,0" VerticalAlignment="Top" Width="90" Height="43" HorizontalContentAlignment="Center" Click="addExcelBtn_Click"/>
+        <Button x:Name="addExcelBtn" Background="Aquamarine" Foreground="Navy" Content="Завантажити &#xD;&#xA;розклад&#xA;" HorizontalAlignment="Right" Margin="0,121,23,0" VerticalAlignment="Top" Width="90" Height="45" HorizontalContentAlignment="Center" Click="addExcelBtn_Click" FontWeight="Bold"/>
+        <Button x:Name="clearDbButton" Background="Brown" Foreground="White" Content="Почистити &#xD;&#xA;базу" HorizontalAlignment="Right" Margin="0,0,23,10" VerticalAlignment="Bottom" Width="90" Height="48"/>
 
     </Grid>
 
