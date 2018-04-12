@@ -21,7 +21,7 @@ namespace MYSchedule.ExcelExport
         #endregion
 
         public static void LessonScheduleByCourseAndSpecialty
-            (DataTable dataTable)
+            (string header, DataTable dataTable)
         {
             Application excel = new Application();
 
@@ -30,7 +30,7 @@ namespace MYSchedule.ExcelExport
 
             Utils.Utils.InitCommonStyle(worksheet);
 
-            CreateHeader(worksheet);
+            CreateHeader(header, worksheet);
             CreateSkeleton(worksheet);
             FillData(worksheet, dataTable);
 
@@ -63,10 +63,8 @@ namespace MYSchedule.ExcelExport
             return string.Format("{0} т. \n {1}.{2} - {3}.{4}", week[0], start.Day.ToString("00"), start.Month.ToString("00"), endDate.Day.ToString("00"), endDate.Month.ToString("00"));
         }
 
-        private static void CreateHeader(Worksheet worksheet)
+        private static void CreateHeader(string header, Worksheet worksheet)
         {
-            var header = "МП \"Комп`ютерні науки\", 1 курс, Англійська мова";
-
             worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, 17]].Merge();
             worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[2, 17]].Merge();
             worksheet.Cells[1, 1] = header;

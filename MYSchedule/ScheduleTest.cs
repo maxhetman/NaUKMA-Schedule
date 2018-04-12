@@ -49,8 +49,8 @@ namespace MYSchedule
             //var dt = QueryManager.GetClassRoomsAvailability();
             //ExcelExportManager.ShowAllClassRooms(dt);
 
-            var dt = QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"МП \"\"Комп`ютерні науки\"\"\"", 1, "\"Англійська мова\"");
-            ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty(dt);
+         //   var dt = QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"МП \"\"Комп`ютерні науки\"\"\"", 1, "\"Англійська мова\"");
+           // ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty(dt);
 
             //var headers = new[] { "Number", "DayName", "LessonTimePeriod", "ClassRoomNumber", "LastName", "Initials", "Type", "Group" };
             //GenericExcelExport.Export(headers, dt);

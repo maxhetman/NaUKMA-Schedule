@@ -32,6 +32,17 @@ namespace MYSchedule.DataAccess
             return DT;
         }
 
+        public static DataTable GetScheduleForWeek(int week)
+        {
+            string query = Queries.ScheduleForWeekQuery(week);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
         private static DataTable Access2Dt(string query)
         {
             DataTable dataTable = new DataTable();

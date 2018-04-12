@@ -10,7 +10,9 @@
     <Grid Name="mainGrid">
         <TabControl x:Name="tabControl" VerticalContentAlignment="Bottom" VerticalAlignment="Top" Height="105">
             <TabItem Header="Методист" Name="methodistTab">
-                <Grid Background="#FFE5E5E5"  Margin="0,0,62,0" Visibility="Visible" Opacity="1">
+                <Grid Background="#FFE5E5E5"  Margin="0,0,79,0" Visibility="Visible" Opacity="1">
+                    <Label x:Name="label7" Foreground="DarkSlateGray" Content="Запити" HorizontalAlignment="Left" Margin="31,0,0,0" VerticalAlignment="Top" Height="30" Width="68" FontWeight="Bold"/>
+
                     <ComboBox Name="mQueries" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="120">
                         <ComboBoxItem Name="mquery1" IsSelected="True">Зайнятість Аудиторій</ComboBoxItem>
                         <ComboBoxItem Name="mquery2">Розклад на тиждень</ComboBoxItem>
@@ -34,10 +36,9 @@
                     </ContentControl>
                     <ContentControl Name ="methoditsParamsQuery2" Margin="135,10,51,10" Visibility="Collapsed">
                         <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="336">
-                            <CheckBox x:Name="mquery2AllWeeks" Content="Всі тижні" HorizontalAlignment="Left" Margin="0,27,0,0" VerticalAlignment="Top" Height="20" Width="88"/>
-                            <StackPanel HorizontalAlignment="Left" Height="57" Margin="88,0,0,0" VerticalAlignment="Top" Width="91">
+                            <StackPanel HorizontalAlignment="Left" Height="57" Margin="10,-10,0,0" VerticalAlignment="Top" Width="99">
                                 <Label x:Name="label1" Content="Номер тижня"/>
-                                <ComboBox x:Name="mquery2WeekNumber" Height="23" Margin="10,0"/>
+                                <ComboBox x:Name="mquery2Weeks" Height="24" Margin="10,0"/>
                             </StackPanel>
 
                         </Grid>
@@ -84,14 +85,16 @@
 
             </TabItem>
         </TabControl>
-        <DataGrid x:Name="dataView" ColumnWidth="*" ItemsSource="{Binding}" Margin="10,110,136,10"/>
+        <DataGrid x:Name="dataView" ColumnWidth="*" ItemsSource="{Binding}" Margin="10,137,136,10"/>
+
         <Grid Name="loader" Margin="20" Visibility="Collapsed">
             <fa:ImageAwesome Icon="Spinner"  Spin="True" Height="48" Width="48" />
         </Grid>
-        <Button x:Name="exportBtn" Background="LightGreen" Foreground="Navy" Content="Export&#xD;&#xA;" Margin="0,180,23,0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90" Height="45" FontWeight="Bold"/>
-        <Button x:Name="searchBtn" Content="Search" Margin="0,47,10,0" Width="51" Height="46" HorizontalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+        <Button x:Name="exportBtn" Background="LightGreen" Foreground="Navy" Content="Експорт&#xD;&#xA;в Excel&#xA;" Margin="0,180,23,0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90" Height="45" FontWeight="Bold"/>
+        <Button x:Name="searchBtn" Content="Виконати" Margin="0,47,10,0" Width="67" Height="46" HorizontalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Top"/>
         <Button x:Name="addExcelBtn" Background="Aquamarine" Foreground="Navy" Content="Завантажити &#xD;&#xA;розклад&#xA;" HorizontalAlignment="Right" Margin="0,121,23,0" VerticalAlignment="Top" Width="90" Height="45" HorizontalContentAlignment="Center" Click="addExcelBtn_Click" FontWeight="Bold"/>
         <Button x:Name="clearDbButton" Background="Brown" Foreground="White" Content="Почистити &#xD;&#xA;базу" HorizontalAlignment="Right" Margin="0,0,23,10" VerticalAlignment="Bottom" Width="90" Height="48"/>
+        <Label x:Name="dataViewHeader" Content="Заголовок" HorizontalAlignment="Left" Margin="0,110,0,0" VerticalAlignment="Top" Width="668" HorizontalContentAlignment="Center" FontWeight="Bold"/>
 
     </Grid>
 

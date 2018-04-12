@@ -49,7 +49,7 @@ namespace MYSchedule.ExcelExport
 
         #endregion
 
-        public static void ShowAllClassRooms(DataTable dataTable)
+        public static void ShowAllClassRooms(string header, DataTable dataTable)
         {
             Application excel = new Application();
 
@@ -58,7 +58,7 @@ namespace MYSchedule.ExcelExport
 
             Utils.Utils.InitCommonStyle(worksheet);
 
-            CreateHeader(worksheet);
+            CreateHeader(header, worksheet);
             CreateSkeleton(worksheet, dataTable);
             FillClassRooms(worksheet);
             FillTable(dataTable, worksheet);
@@ -232,15 +232,12 @@ namespace MYSchedule.ExcelExport
             return new CellIndex {x = x, y = y};
         }
 
-        private static void CreateHeader(Worksheet worksheet)
+        private static void CreateHeader(string header, Worksheet worksheet)
         {
-            var header = "Розклад аудиторій на весну 2017-2018";
-
             worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, 15]].Merge();
             worksheet.Cells[1, 1] = header;
             worksheet.Range[worksheet.Cells[1, 1],
                 worksheet.Cells[1, 1]].Interior.Color = XlRgbColor.rgbBeige;
-
 
             worksheet.Range[worksheet.Cells[2, 4], worksheet.Cells[2, 5]].Merge();
             worksheet.Range[worksheet.Cells[2, 6], worksheet.Cells[2, 7]].Merge();

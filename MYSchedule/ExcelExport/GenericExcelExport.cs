@@ -10,8 +10,9 @@ namespace MYSchedule.ExcelExport
 {
     public static class GenericExcelExport
     {
-        public static void Export(string[] columnNames, DataTable dataTable)
+        public static void Export(string header, DataTable dataTable)
         {
+            var columnNames = Utils.Utils.GetColumnNames(dataTable);
             Application excel = new Application();
 
             excel.Application.Workbooks.Add(true);
@@ -19,7 +20,7 @@ namespace MYSchedule.ExcelExport
 
             Utils.Utils.InitCommonStyle(worksheet);
 
-            CreateHeader(worksheet, columnNames);
+            CreateHeader(header, worksheet, columnNames);
             FillData(worksheet, dataTable);
             FinalStyleAdditions(worksheet, columnNames, dataTable);
             excel.Visible = true;
@@ -39,11 +40,16 @@ namespace MYSchedule.ExcelExport
             var columnsCount = dataTable.Columns.Count;
             var rowsCount = dataTable.Rows.Count;
 
-            var headersRange = worksheet.Range[worksheet.Cells[1, 1],
-                    worksheet.Cells[1, columnsCount]]
+            worksheet.Cells[1, 1].Font.Size = 15;
+            worksheet.Cells[1, 1].Font.Bold = true;
+            worksheet.Cells[1, 1].Borders.Weight = 2d;
+
+
+            var headersRange = worksheet.Range[worksheet.Cells[2, 1],
+                    worksheet.Cells[2, columnsCount]]
                 .Cells;
 
-            headersRange.Font.Size = 15;
+            headersRange.Font.Size = 12;
             headersRange.Font.Bold = true;
             headersRange.Borders.Weight = 2d;
 
@@ -63,17 +69,20 @@ namespace MYSchedule.ExcelExport
             worksheet.Range["A1", "U500"].Rows.AutoFit();
         }
 
-        private static void CreateHeader(Worksheet worksheet, string[] columnNames)
+        private static void CreateHeader(string header, Worksheet worksheet, string[] columnNames)
         {
+            worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, columnNames.Length]].Merge();
+            worksheet.Cells[1, 1] = header;
+
             for (int i = 0; i < columnNames.Length; i++)
             {
-                worksheet.Cells[1, i+1] = columnNames[i];
+                worksheet.Cells[2, i+1] = columnNames[i];
             }
         }
 
         private static void FillData(Worksheet worksheet, DataTable dataTable)
         {            
-            var headerOffset = 2;           
+            var headerOffset = 3;           
             for (int i = 0; i < dataTable.Rows.Count; i++)
             {
                 var currentRow = dataTable.Rows[i];

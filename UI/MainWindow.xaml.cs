@@ -2,20 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Microsoft.Win32;
 using MYSchedule.DataAccess;
 using MYSchedule.DTO;
 using MYSchedule.ExcelExport;
@@ -29,21 +17,25 @@ namespace UI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly BackgroundWorker worker = new BackgroundWorker();
+        private readonly BackgroundWorker ImportExcelWorker = new BackgroundWorker();
+        private readonly BackgroundWorker ExportExcelWorker = new BackgroundWorker();
         private string[] fileNames;
 
         public MainWindow()
         {
             InitializeComponent();
-            InitLoader();
+            InitWorkers();
             FillDropDownsInfo();
             InitializeListeners();
         }
 
-        private void InitLoader()
+        private void InitWorkers()
         {
-            worker.DoWork += worker_DoWork;
-            worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+            ImportExcelWorker.DoWork += ImportExcelWorkerDoWork;
+            ImportExcelWorker.RunWorkerCompleted += ImportExcelWorkerRunImportExcelWorkerCompleted;
+
+            ExportExcelWorker.DoWork += ExportExcelWorkerDoWork;
+            ExportExcelWorker.RunWorkerCompleted += ExportExcelWorkerCompleted;
         }
 
         private void InitializeListeners()
@@ -97,14 +89,14 @@ namespace UI
         {
             mQueries.SelectedIndex = -1;
             var inconsistentData = DBAccessManager.GetInconsistentTeachers();
-            SetDataView(inconsistentData);
+            SetDataView("Перевірка вчителів на несуперечливість", inconsistentData);
         }
 
         private void CheckClassRoomConsistensy(object sender, RoutedEventArgs e)
         {
             mQueries.SelectedIndex = -1;
             var inconsistentData = DBAccessManager.GetInconsistentClassrooms();
-            SetDataView(inconsistentData);
+            SetDataView("Перевірка аудиторій на несуперечливість", inconsistentData);
         }
 
         private void OnMQuery1Reset(object sender, RoutedEventArgs e)
@@ -170,29 +162,50 @@ namespace UI
 
         private void OnExportBtnClick(object sender, RoutedEventArgs e)
         {
-            if (methodistTab.IsSelected)
+            if (CurrentData == null || CurrentData.Rows.Count < 1)
             {
-                if (mquery1.IsSelected)
-                {
-                    ExcelExportManager.ShowAllClassRooms(CurrentData);
-                }
-            } else if (teacherTab.IsSelected)
+                ShowPopup("Немає даних для експорту\nНатисніть кнопку \"Виконати\"");
+                return;
+            }
+
+            Action<string, DataTable> exportDelegate = null;
+
+            if (methodistTab.IsSelected && mquery1.IsSelected)
+            {
+                exportDelegate = ExcelExportManager.ShowAllClassRooms;
+            }
+
+            if (teacherTab.IsSelected)
             {
                 if (teacherSubjectScheduleQuery.IsSelected)
                 {
-                    ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty(CurrentData);
+                    exportDelegate = ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty;
                 }
-            } else
-            {
-                GenericExcelExport.Export(Utils.GetColumnNames(CurrentData), CurrentData);
             }
 
+            if (exportDelegate == null)
+            {
+                exportDelegate = GenericExcelExport.Export;
+            }
+
+            loader.Visibility = Visibility.Visible;
+            SetUiState(false);
+            ExportExcelWorker.RunWorkerAsync(new object[]{exportDelegate, CurrentData, dataViewHeader.Content});
         }
 
-        private DataTable CurrentData => ((DataView)dataView.ItemsSource).ToTable();
+        private DataTable CurrentData
+        {
+            get
+            {
+                var itemsSource = (DataView) dataView.ItemsSource;
+                return itemsSource?.ToTable();
+            }
+        }
 
         private void OnSearchBtnClick(object sender, RoutedEventArgs e)
         {
+            var header = string.Empty;
+
             if (methodistTab.IsSelected)
             {
                 if (mquery1.IsSelected)
@@ -202,24 +215,112 @@ namespace UI
                     {
                         ShowPopup("По заданим даним немає інформації");
                     }
-
-                    SetDataView(dataTable);
+                    else
+                    {
+                        header = GetMquery1Header();
+                    }
+                    SetDataView(header, dataTable);
+                } else if (mquery2.IsSelected)
+                {
+                    var dataTable = GetScheduleForWeek();
+                    if (dataTable.Rows.Count > 1)
+                    {
+                        header = GetMquery2Header();
+                    }
+                    SetDataView(header, dataTable);
                 }
             } else if (teacherTab.IsSelected)
             {
                 if (teacherSubjectScheduleQuery.IsSelected)
                 {
                     var dataTable = GetSubjectSchedule();
-
                     if (dataTable.Rows.Count < 1)
                     {
                         ShowPopup("По заданим даним немає інформації");
                     }
-
-                    SetDataView(dataTable);
+                    else
+                    {
+                        header = GetSubjectScheduleHeader();
+                    }
+                    SetDataView(header, dataTable);
                 }
             }
 
+        }
+
+        private string GetSubjectScheduleHeader()
+        {
+            var specialty = teacherSpecialtyCb.Text;
+            int? yearOfStudying = string.IsNullOrEmpty(teacherYearOfStudyingCb.Text)
+                ? (int?)null
+                : int.Parse(teacherYearOfStudyingCb.Text);
+            var subject = teacherSubjectCb.Text;
+
+            return string.Format("{0}, {1} курс, {2}", specialty, yearOfStudying, subject);
+        }
+
+        private string GetMquery2Header()
+        {
+            return "Розклад на " + mquery2Weeks.Text;
+        }
+
+        private string GetMquery1Header()
+        {
+            int? building = string.IsNullOrEmpty(buildings.Text) ? (int?) null : int.Parse(buildings.Text);
+            var isComputer = showComputerClassrooms.IsChecked;
+            var classRoomNumber = classRoomNumbers.Text;
+
+            if (isComputer != true)
+            {
+                isComputer = null;
+            }
+
+            if (classRoomNumber == string.Empty)
+            {
+                classRoomNumber = null;
+            }
+
+            if (!string.IsNullOrEmpty(classRoomNumber))
+            {
+                return string.Format("Зайнятість аудиторії {0}", classRoomNumber);
+            }
+
+            var classroomType = isComputer == null ? " " : " комп`ютерних ";
+            var header = string.Format("Зайнятість{0}аудиторій ", classroomType);
+
+            if (building != null)
+            {
+                header += string.Format("{0} корпусу ", building);
+            }
+
+            return header;
+        }
+
+        private DataTable GetScheduleForWeek()
+        {
+            string chosenWeeks = mquery2Weeks.Text;
+
+            if (string.IsNullOrEmpty(chosenWeeks))
+            {
+                ShowPopup("Виберіть номер тижня");
+                return new DataTable();
+            }
+
+            var weekNumber = int.Parse(chosenWeeks.Substring(0, chosenWeeks.IndexOf(" ")));
+            var dataTable =  QueryManager.GetScheduleForWeek(weekNumber);
+
+            if (!string.IsNullOrEmpty(chosenWeeks) && dataTable.Rows.Count < 1)
+            {
+                ShowPopup("По заданим даним немає інформації");
+            }
+            
+            return dataTable;
+        }
+
+        private void SetDataView(string header, DataTable dataTable)
+        {
+            dataViewHeader.Content = header;
+            dataView.DataContext = dataTable;
         }
 
         private  DataTable GetSubjectSchedule()
@@ -272,11 +373,6 @@ namespace UI
             return QueryManager.GetClassRoomsAvailability(classroomNumber:classRoomNumber, buildingNumber:building, isComputer:isComputer);
         }
 
-        private void SetDataView(DataTable dataTable)
-        {
-            dataView.DataContext = dataTable;
-        }
-
         private void FillDropDownsInfo()
         {
             buildings.ItemsSource = ClassRoomsDao.GetAllBuildings();
@@ -284,6 +380,7 @@ namespace UI
             teacherSpecialtyCb.ItemsSource = SpecialtyDao.GetAllSpecialties();
             teacherSubjectCb.ItemsSource = ScheduleRecordDao.GetAllSubjects();
             teacherYearOfStudyingCb.ItemsSource = ScheduleRecordDao.GetAllYears();
+            mquery2Weeks.ItemsSource = WeeksDao.GetFormattedWeeks();
         }
 
         private void addExcelBtn_Click(object sender, RoutedEventArgs e)
@@ -306,11 +403,11 @@ namespace UI
                 loader.Visibility = Visibility.Visible;
                 SetUiState(false);
                 fileNames = dlg.FileNames;
-                worker.RunWorkerAsync();
+                ImportExcelWorker.RunWorkerAsync();
             }
         }
 
-        private void worker_DoWork(object sender, DoWorkEventArgs e)
+        private void ImportExcelWorkerDoWork(object sender, DoWorkEventArgs e)
         {
             // run all background tasks here
 
@@ -338,10 +435,25 @@ namespace UI
             }
         }
 
-        private void worker_RunWorkerCompleted(object sender,
+        private void ImportExcelWorkerRunImportExcelWorkerCompleted(object sender,
             RunWorkerCompletedEventArgs e)
         {
             FillDropDownsInfo();
+            loader.Visibility = Visibility.Hidden;
+            SetUiState(true);
+        }
+
+        private void ExportExcelWorkerDoWork(object sender, DoWorkEventArgs e)
+        {
+            var parameters = (object[]) e.Argument;
+            var exportDelegate = (Action<string, DataTable>) parameters[0];
+            var currData = (DataTable) parameters[1];
+            var header = (string) parameters[2];
+            exportDelegate.Invoke(header, currData);
+        }
+
+        private void ExportExcelWorkerCompleted(object sender,RunWorkerCompletedEventArgs e)
+        {
             loader.Visibility = Visibility.Hidden;
             SetUiState(true);
         }

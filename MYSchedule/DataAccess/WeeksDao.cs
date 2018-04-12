@@ -27,6 +27,24 @@ namespace MYSchedule.DataAccess
             }
         }
 
+        public static string[] GetFormattedWeeks()
+        {
+            var weeksDt = GetAllWeeks();
+            string[] res = new string[weeksDt.Rows.Count];
+            for(int i = 0; i < res.Length; i++)
+            {
+                res[i] = GetFormattedWeeks(weeksDt.Rows[i]);
+            }
+            return res;
+        }
+
+        private static string GetFormattedWeeks(DataRow week)
+        {
+            var start = Convert.ToDateTime(week[1]).Date;
+            var endDate = Convert.ToDateTime(week[2]).Date;
+            return string.Format("{0} т. {1}.{2} - {3}.{4}", week[0], start.Day.ToString("00"), start.Month.ToString("00"), endDate.Day.ToString("00"), endDate.Month.ToString("00"));
+        }
+
         public static void SetFirstWeekDate(DateTime selectedDate)
         {
             var beginDate = selectedDate;
