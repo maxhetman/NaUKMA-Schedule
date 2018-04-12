@@ -60,7 +60,7 @@ namespace MYSchedule.ExcelExport
         {
             var start = Convert.ToDateTime(week[1]).Date;
             var endDate = Convert.ToDateTime(week[2]).Date;
-            return string.Format("{0} т. \n {1}.{2} - {3}.{4}", week[0], start.Day, start.Month, endDate.Day, endDate.Month);
+            return string.Format("{0} т. \n {1}.{2} - {3}.{4}", week[0], start.Day.ToString("00"), start.Month.ToString("00"), endDate.Day.ToString("00"), endDate.Month.ToString("00"));
         }
 
         private static void CreateHeader(Worksheet worksheet)
@@ -119,21 +119,26 @@ namespace MYSchedule.ExcelExport
                     worksheet.Range[worksheet.Cells[currentDayTimeCell.x, currentDayTimeCell.y],
                         worksheet.Cells[currentDayTimeCell.x, lastWeekYIndex-1]].Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
 
-                    currentDayTimeCell.x++;
                     worksheet.Cells[currentDayTimeCell.x, currentDayTimeCell.y] = currentDayName + "\n" + currentLessonTime;
+                    currentDayTimeCell.x++;
                 }
 
 
                 var classRoom = dataRow[3].ToString();
 
-                if (currentClassRoom != classRoom)
+                if (currentClassRoom != classRoom || dayTimeWasChanged)
                 {
                     worksheet.Range[worksheet.Cells[currentClassRoomCell.x, currentClassRoomCell.y],
                         worksheet.Cells[currentClassRoomCell.x, lastWeekYIndex-1]].Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
 
-                    if(currentClassRoomCell.x % 2 ==0)
-                    worksheet.Range[worksheet.Cells[currentClassRoomCell.x, currentClassRoomCell.y],
-                        worksheet.Cells[currentClassRoomCell.x, lastWeekYIndex - 1]].Interior.Color = XlRgbColor.rgbLightGray;
+                    if (currentClassRoomCell.x % 2 == 0)
+                    {
+                        worksheet.Range[worksheet.Cells[currentClassRoomCell.x, currentClassRoomCell.y],
+                                worksheet.Cells[currentClassRoomCell.x, lastWeekYIndex - 1]]
+                            .Interior.Color = XlRgbColor.rgbLightGray;
+                    }
+
+                   
 
                     currentClassRoom = classRoom;
                     worksheet.Cells[currentClassRoomCell.x, currentClassRoomCell.y] = currentClassRoom;
@@ -151,7 +156,7 @@ namespace MYSchedule.ExcelExport
                 var teacher = dataRow[4].ToString()+ " " + dataRow[5].ToString();
 
 
-                if (currerntTeacher != teacher)
+                if (currerntTeacher != teacher || dayTimeWasChanged)
                 {
                     currerntTeacher = teacher;
                     worksheet.Cells[currentTeacherCell.x, currentTeacherCell.y] = currerntTeacher;
@@ -191,10 +196,10 @@ namespace MYSchedule.ExcelExport
             worksheet.Columns[1].ColumnWidth = 14;
             worksheet.Columns[2].ColumnWidth = 10;
 
-            for (int i = 4; i < 8; i++)
-            {
-                worksheet.Rows[i].RowHeight= 20;
-            }
+            //for (int i = 4; i < 8; i++)
+            //{
+            //    worksheet.Rows[i].RowHeight= 20;
+            //}
 
             for (int i = 4; i < lastWeekYIndex; i++)
             {

@@ -170,45 +170,85 @@ namespace UI
 
         private void OnExportBtnClick(object sender, RoutedEventArgs e)
         {
-            if (mquery1.IsSelected)
+            if (methodistTab.IsSelected)
             {
-                ExcelExportManager.ShowAllClassRooms(GetCurrentData());
-            }
-            else
+                if (mquery1.IsSelected)
+                {
+                    ExcelExportManager.ShowAllClassRooms(CurrentData);
+                }
+            } else if (teacherTab.IsSelected)
             {
-                var dataTable = ((DataView) dataView.ItemsSource).ToTable();
-                GenericExcelExport.Export(Utils.GetColumnNames(dataTable), dataTable);
+                if (teacherSubjectScheduleQuery.IsSelected)
+                {
+                    ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty(CurrentData);
+                }
+            } else
+            {
+                GenericExcelExport.Export(Utils.GetColumnNames(CurrentData), CurrentData);
             }
 
         }
+
+        private DataTable CurrentData => ((DataView)dataView.ItemsSource).ToTable();
 
         private void OnSearchBtnClick(object sender, RoutedEventArgs e)
         {
-            if (mquery1.IsSelected)
+            if (methodistTab.IsSelected)
             {
-                var dataTable = GetCurrentData();
-                if (dataTable.Rows.Count < 1)
-                    ShowPopup("По заданим даним немає інформації");
-                else
+                if (mquery1.IsSelected)
+                {
+                    var dataTable = GetAvailableClassRooms();
+                    if (dataTable.Rows.Count < 1)
+                    {
+                        ShowPopup("По заданим даним немає інформації");
+                    }
+
                     SetDataView(dataTable);
+                }
+            } else if (teacherTab.IsSelected)
+            {
+                if (teacherSubjectScheduleQuery.IsSelected)
+                {
+                    var dataTable = GetSubjectSchedule();
+
+                    if (dataTable.Rows.Count < 1)
+                    {
+                        ShowPopup("По заданим даним немає інформації");
+                    }
+
+                    SetDataView(dataTable);
+                }
             }
+
         }
+
+        private  DataTable GetSubjectSchedule()
+        {
+            var specialty = teacherSpecialtyCb.Text;
+            int? yearOfStudying = string.IsNullOrEmpty(teacherYearOfStudyingCb.Text)
+                ? (int?) null
+                : int.Parse(teacherYearOfStudyingCb.Text);
+            var subject = teacherSubjectCb.Text;
+
+            if (string.IsNullOrEmpty(specialty) || string.IsNullOrEmpty(subject) || yearOfStudying == null)
+            {
+                ShowPopup("Вкажіть всі фільтри");
+                return new DataTable();
+            }
+            else
+            {
+                //sorry for this
+                specialty = specialty.Replace("\"", "\"\"");
+                return QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"" + specialty + "\"", (int) yearOfStudying , "\"" + subject + "\"");
+            }
+
+
+        }
+    
 
         private void ShowPopup(string message)
         {
             MessageBox.Show(message, "Розклад", MessageBoxButton.OK);
-        }
-
-        private DataTable GetCurrentData()
-        {
-            if (mquery1.IsSelected)
-            {
-                return GetAvailableClassRooms();
-            }
-            else
-            {
-                return null;
-            }
         }
 
         private DataTable GetAvailableClassRooms()
@@ -241,6 +281,9 @@ namespace UI
         {
             buildings.ItemsSource = ClassRoomsDao.GetAllBuildings();
             classRoomNumbers.ItemsSource = ClassRoomsDao.GetAllNumbers();
+            teacherSpecialtyCb.ItemsSource = SpecialtyDao.GetAllSpecialties();
+            teacherSubjectCb.ItemsSource = ScheduleRecordDao.GetAllSubjects();
+            teacherYearOfStudyingCb.ItemsSource = ScheduleRecordDao.GetAllYears();
         }
 
         private void addExcelBtn_Click(object sender, RoutedEventArgs e)

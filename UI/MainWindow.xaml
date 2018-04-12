@@ -6,10 +6,10 @@
         xmlns:local="clr-namespace:UI"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
-        Title="Schedule" MinHeight="328.252" MinWidth="597.646" Width="824.42" Height="516.062">
+        Title="Schedule" MinHeight="515" MinWidth="825" Width="824.42" Height="516.062">
     <Grid Name="mainGrid">
         <TabControl x:Name="tabControl" VerticalContentAlignment="Bottom" VerticalAlignment="Top" Height="105">
-            <TabItem Header="Методист">
+            <TabItem Header="Методист" Name="methodistTab">
                 <Grid Background="#FFE5E5E5"  Margin="0,0,62,0" Visibility="Visible" Opacity="1">
                     <ComboBox Name="mQueries" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Width="120">
                         <ComboBoxItem Name="mquery1" IsSelected="True">Зайнятість Аудиторій</ComboBoxItem>
@@ -52,13 +52,30 @@
 
                 </Grid>
             </TabItem>
-            <TabItem Header="Викладач">
+            <TabItem Header="Викладач" Name="teacherTab">
+                <Grid Background="#FFE5E5E5">
+                    <ComboBox x:Name="comboBox1" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="147" Height="32">
+                        <ComboBoxItem IsSelected="True" Name="teacherSubjectScheduleQuery" Content="Розклад предмета"/>
+                    </ComboBox>
+                    <ContentControl HorizontalAlignment="Left" Margin="162,10,0,0" VerticalAlignment="Top" Height="57" Width="571">
+                        <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="571">
+                            <ComboBox x:Name="teacherSpecialtyCb" HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top" Width="120"/>
+                            <Label x:Name="label4" Content="Спеціальність" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Height="26" Width="120"/>
+                            <ComboBox x:Name="teacherYearOfStudyingCb" HorizontalAlignment="Left" Margin="151,26,0,0" VerticalAlignment="Top" Width="120"/>
+                            <Label x:Name="label5" Content="Курс" HorizontalAlignment="Left" Margin="151,0,0,0" VerticalAlignment="Top" Height="26" Width="120"/>
+                            <ComboBox x:Name="teacherSubjectCb" HorizontalAlignment="Left" Margin="294,26,0,0" VerticalAlignment="Top" Width="120"/>
+                            <Label x:Name="label6" Content="Предмет" HorizontalAlignment="Left" Margin="294,0,0,0" VerticalAlignment="Top" Height="26" Width="120"/>
+
+                        </Grid>
+
+                    </ContentControl>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Студент" Name="studentTab">
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
-            <TabItem Header="Студент">
-                <Grid Background="#FFE5E5E5"/>
-            </TabItem>
-            <TabItem Header="Налаштування" Margin="536,0,-540,0" VerticalAlignment="Top" HorizontalAlignment="Right"  >
+            <TabItem Header="Налаштування" Name="settingsTab" Margin="536,0,-535,0" HorizontalAlignment="Right"  >
                 <Grid Background="#FFE5E5E5">
                     <DatePicker Name="weekDateSelector" HorizontalAlignment="Left" Margin="158,24,0,0" VerticalAlignment="Top" Height="31" Width="134"/>
                     <Label x:Name="label3" Content="Виберіть дату початку&#xD;&#xA;першого тижня:" HorizontalAlignment="Left" Margin="10,14,0,0" VerticalAlignment="Top" Width="134" Height="41"/>

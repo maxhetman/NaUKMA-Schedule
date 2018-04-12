@@ -41,8 +41,8 @@ namespace MYSchedule.DataAccess
                     continue;
                 }
 
-                var beginDateStr = beginDate.ToString("MM.dd.yyyy");
-                var endDateStr = endDate.ToString("MM.dd.yyyy");
+                var beginDateStr = beginDate.ToString("MM/dd/yyyy");
+                var endDateStr = endDate.ToString("MM/dd/yyyy");
 
                 var query = "UPDATE [Week] SET [Begin] = \"" + beginDateStr + "\", [End] = \"" + endDateStr + "\"  WHERE Number = " + i;
                 UpdateWeekInfo(query);

@@ -16,6 +16,8 @@ namespace MYSchedule.DataAccess
 
         private const string selectScheduleRecordById = "Select * From ScheduleRecord Where Id = @Id";
 
+        private const string getAllSpecialtiesQuery = "Select DISTINCT Subject FROM ScheduleRecord";
+        private const string getAllYearsQuery = "Select DISTINCT YearOfStudying FROM ScheduleRecord";
         public static bool AddIfNotExists(ScheduleRecordDto scheduleRecord)
         {
 
@@ -78,6 +80,55 @@ namespace MYSchedule.DataAccess
             }
         }
 
+        public static string[] GetAllSubjects()
+        {
+            DataTable dataTable = new DataTable();
+
+            using (OleDbDataAdapter dataAdapter = new OleDbDataAdapter())
+            {
+                // Create the command and set its properties
+                dataAdapter.SelectCommand = new OleDbCommand();
+                dataAdapter.SelectCommand.Connection = new OleDbConnection(ConnectionConfig.ConnectionString);
+                dataAdapter.SelectCommand.CommandType = CommandType.Text;
+                dataAdapter.SelectCommand.CommandText = getAllSpecialtiesQuery;
+
+                // Fill the datatable From adapter
+                dataAdapter.Fill(dataTable);
+                string[] res = new string[dataTable.Rows.Count];
+
+                for (int i = 0; i < dataTable.Rows.Count; i++)
+                {
+                    res[i] = dataTable.Rows[i][0].ToString();
+                }
+
+                return res;
+            }
+        }
+
+        public static string[] GetAllYears()
+        {
+            DataTable dataTable = new DataTable();
+
+            using (OleDbDataAdapter dataAdapter = new OleDbDataAdapter())
+            {
+                // Create the command and set its properties
+                dataAdapter.SelectCommand = new OleDbCommand();
+                dataAdapter.SelectCommand.Connection = new OleDbConnection(ConnectionConfig.ConnectionString);
+                dataAdapter.SelectCommand.CommandType = CommandType.Text;
+                dataAdapter.SelectCommand.CommandText = getAllYearsQuery;
+
+                // Fill the datatable From adapter
+                dataAdapter.Fill(dataTable);
+                string[] res = new string[dataTable.Rows.Count];
+
+                for (int i = 0; i < dataTable.Rows.Count; i++)
+                {
+                    res[i] = dataTable.Rows[i][0].ToString();
+                }
+
+                return res;
+            }
+        }
         public static bool IsStoredInDb(int scheduleRecordId)
         {
             DataTable dataTable = new DataTable();
