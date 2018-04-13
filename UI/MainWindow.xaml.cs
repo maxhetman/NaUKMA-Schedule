@@ -43,9 +43,15 @@ namespace UI
             MethodistListeners();
             TeachersListeners();
             SettingsListeners();
+            StudentsListeners();
             searchBtn.Click += OnSearchBtnClick;
             exportBtn.Click += OnExportBtnClick;
             clearDbButton.Click += OnClearDbClick;
+        }
+
+        private void StudentsListeners()
+        {
+            studentSubjectScheduleQuery.Selected += studentSubjectScheduleQuerySelected;
         }
 
         private void TeachersListeners()
@@ -175,6 +181,11 @@ namespace UI
             teacherScheduleParams.Visibility = Visibility.Collapsed;
         }
 
+        private void studentSubjectScheduleQuerySelected(object sender, RoutedEventArgs e)
+        {
+            //todo: toggle queires params
+        }
+
         private void teacherScheduleQuerySelected(object sender, RoutedEventArgs e)
         {
             teacherScheduleParams.Visibility = Visibility.Visible;
@@ -200,6 +211,14 @@ namespace UI
             if (teacherTab.IsSelected)
             {
                 if (teacherSubjectScheduleQuery.IsSelected)
+                {
+                    exportDelegate = ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty;
+                }
+            }
+
+            if (studentTab.IsSelected)
+            {
+                if (studentSubjectScheduleQuery.IsSelected)
                 {
                     exportDelegate = ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty;
                 }
@@ -233,6 +252,10 @@ namespace UI
                 if (mquery1.IsSelected)
                 {
                     var dataTable = GetAvailableClassRooms();
+                    if (dataTable == null)
+                    {
+                        return;
+                    }
                     if (dataTable.Rows.Count < 1)
                     {
                         ShowPopup("По заданим даним немає інформації");
@@ -249,12 +272,12 @@ namespace UI
                     {
                         return;
                     }
-                    if (dataTable.Rows.Count > 1)
-                    {
-                        header = GetMquery2Header();
-                    } else 
+                    if (dataTable.Rows.Count < 1)
                     {
                         ShowPopup("По заданим даним немає інформації");
+                    } else 
+                    {
+                        header = GetMquery2Header();
                     }
                     SetDataView(header, dataTable);
                 }
@@ -262,7 +285,7 @@ namespace UI
             {
                 if (teacherSubjectScheduleQuery.IsSelected)
                 {
-                    var dataTable = GetSubjectSchedule();
+                    var dataTable = GetSubjectScheduleTeacherTab();
                     if (dataTable == null)
                         return;
                     if (dataTable.Rows.Count < 1)
@@ -271,7 +294,7 @@ namespace UI
                     }
                     else
                     {
-                        header = GetSubjectScheduleHeader();
+                        header = GetSubjectScheduleHeaderTeacherTab();
                     }
                     SetDataView(header, dataTable);
                 }else if (teacherScheduleQuery.IsSelected)
@@ -286,6 +309,23 @@ namespace UI
                     else
                     {
                         header = GetTeacherScheduleHeader();
+                    }
+                    SetDataView(header, dataTable);
+                }
+            } else if (studentTab.IsSelected)
+            {
+                if (studentSubjectScheduleQuery.IsSelected)
+                {
+                    var dataTable = GetSubjectScheduleStudentsTab();
+                    if (dataTable == null)
+                        return;
+                    if (dataTable.Rows.Count < 1)
+                    {
+                        ShowPopup("По заданим даним немає інформації");
+                    }
+                    else
+                    {
+                        header = GetSubjectScheduleHeaderStudentTab();
                     }
                     SetDataView(header, dataTable);
                 }
@@ -325,13 +365,24 @@ namespace UI
             return QueryManager.GetTeacherScheduleForSelectedWeek(lastName, initials, weekNumber);
         }
 
-        private string GetSubjectScheduleHeader()
+        private string GetSubjectScheduleHeaderTeacherTab()
         {
             var specialty = teacherSpecialtyCb.Text;
             int? yearOfStudying = string.IsNullOrEmpty(teacherYearOfStudyingCb.Text)
                 ? (int?)null
                 : int.Parse(teacherYearOfStudyingCb.Text);
             var subject = teacherSubjectCb.Text;
+
+            return string.Format("{0}, {1} курс, {2}", specialty, yearOfStudying, subject);
+        }
+
+        private string GetSubjectScheduleHeaderStudentTab()
+        {
+            var specialty = studentSpecialtyCb.Text;
+            int? yearOfStudying = string.IsNullOrEmpty(studentYearOfStudyingCb.Text)
+                ? (int?)null
+                : int.Parse(studentYearOfStudyingCb.Text);
+            var subject = studentSubjectCb.Text;
 
             return string.Format("{0}, {1} курс, {2}", specialty, yearOfStudying, subject);
         }
@@ -400,7 +451,7 @@ namespace UI
             dataView.DataContext = dataTable;
         }
 
-        private  DataTable GetSubjectSchedule()
+        private  DataTable GetSubjectScheduleTeacherTab()
         {
             var specialty = teacherSpecialtyCb.Text;
             int? yearOfStudying = string.IsNullOrEmpty(teacherYearOfStudyingCb.Text)
@@ -421,7 +472,29 @@ namespace UI
             }
 
         }
-    
+
+        private DataTable GetSubjectScheduleStudentsTab()
+        {
+            var specialty = studentSpecialtyCb.Text;
+            int? yearOfStudying = string.IsNullOrEmpty(studentYearOfStudyingCb.Text)
+                ? (int?)null
+                : int.Parse(studentYearOfStudyingCb.Text);
+            var subject = studentSubjectCb.Text;
+
+            if (string.IsNullOrEmpty(specialty) || string.IsNullOrEmpty(subject) || yearOfStudying == null)
+            {
+                ShowPopup("Виберіть всі параметри");
+                return null;
+            }
+            else
+            {
+                //sorry for this
+                specialty = specialty.Replace("\"", "\"\"");
+                return QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"" + specialty + "\"", (int)yearOfStudying, "\"" + subject + "\"");
+            }
+
+        }
+
 
         private void ShowPopup(string message)
         {
@@ -446,6 +519,12 @@ namespace UI
                 classRoomNumber = null;
             }
 
+            if (building == null && isComputer == null && classRoomNumber == null)
+            {
+                ShowPopup("Виберіть хоча б один параметр пошуку");
+                return null;
+            }
+
             return QueryManager.GetClassRoomsAvailability(classroomNumber:classRoomNumber, buildingNumber:building, isComputer:isComputer);
         }
 
@@ -453,9 +532,20 @@ namespace UI
         {
             buildings.ItemsSource = ClassRoomsDao.GetAllBuildings();
             classRoomNumbers.ItemsSource = ClassRoomsDao.GetAllNumbers();
-            teacherSpecialtyCb.ItemsSource = SpecialtyDao.GetAllSpecialties();
-            teacherSubjectCb.ItemsSource = ScheduleRecordDao.GetAllSubjects();
-            teacherYearOfStudyingCb.ItemsSource = ScheduleRecordDao.GetAllYears();
+            
+            var allSpecialties = SpecialtyDao.GetAllSpecialties();
+            var allSubjects = ScheduleRecordDao.GetAllSubjects();
+            var allYears = ScheduleRecordDao.GetAllYears();
+
+            teacherSpecialtyCb.ItemsSource = allSpecialties;
+            teacherSubjectCb.ItemsSource = allSubjects;
+            teacherYearOfStudyingCb.ItemsSource = allYears;
+
+            studentSpecialtyCb.ItemsSource = allSpecialties;
+            studentSubjectCb.ItemsSource = allSubjects;
+            studentYearOfStudyingCb.ItemsSource = allYears;
+
+
             var allWeeks = WeeksDao.GetFormattedWeeks();
             mquery2Weeks.ItemsSource = allWeeks;
 

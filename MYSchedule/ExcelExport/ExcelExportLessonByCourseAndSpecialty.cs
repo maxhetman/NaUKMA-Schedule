@@ -23,6 +23,7 @@ namespace MYSchedule.ExcelExport
         public static void LessonScheduleByCourseAndSpecialty
             (string header, DataTable dataTable)
         {
+            WeekNumberCellIndex.Clear();
             Application excel = new Application();
 
             excel.Application.Workbooks.Add(true);
