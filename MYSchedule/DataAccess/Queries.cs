@@ -15,14 +15,35 @@
                 "SELECT DayName AS День, LessonTimePeriod AS Пара,  Subject AS Предмет, LT.Type AS Тип, SP.Name AS Спеціальність, YearOfStudying AS Курс, Group AS Група, ClassRoomNumber AS Аудиторія FROM(((((ScheduleRecord AS S INNER JOIN [Day] AS D ON S.DayNumber= D.DayNumber) INNER JOIN LessonTime AS L ON S.LessonTimeNumber=L.Number) INNER JOIN Teacher AS T ON S.TeacherId = T.Id) INNER JOIN Specialty AS SP ON S.SpecialtyId=SP.Id) INNER JOIN WeekSchedule AS WS ON S.Id = WS.ScheduleRecordId) INNER JOIN LessonType AS LT ON S.LessonTypeId = LT.Id ";
 
         private const string OrderByDayLessonClassRoomWeek = " ORDER BY D.DayNumber, L.Number, S.ClassRoomNumber, W.Number";
+
         private const string OrderByDayLessonSubject = " ORDER BY D.DayNumber, L.Number, Subject";
 
+        private const string teacherScheduleForAllWeeks = "SELECT DayName AS День, LessonTimePeriod AS Пара, ClassRoomNumber AS Аудиторія, Subject AS Предмет, LT.Type AS Тип, SP.Name AS Спеціальність, YearOfStudying AS Курс, Group AS Група,  Weeks AS Тижні FROM((((ScheduleRecord AS S INNER JOIN [Day] AS D ON S.DayNumber= D.DayNumber) INNER JOIN LessonTime AS L ON S.LessonTimeNumber=L.Number) INNER JOIN Teacher AS T ON S.TeacherId = T.Id) INNER JOIN Specialty AS SP ON S.SpecialtyId=SP.Id) INNER JOIN LessonType AS LT ON S.LessonTypeId=LT.Id ";
+
+        private const string teacherScheduleForWeek =
+                "SELECT DayName AS День, LessonTimePeriod AS Пара, ClassRoomNumber AS Аудиторія, Subject AS Предмет, LT.Type AS Тип, SP.Name AS Спеціальність, YearOfStudying AS Курс, Group AS Група FROM(((((ScheduleRecord AS S INNER JOIN [Day] AS D ON S.DayNumber= D.DayNumber) INNER JOIN LessonTime AS L ON S.LessonTimeNumber=L.Number) INNER JOIN Teacher AS T ON S.TeacherId = T.Id) INNER JOIN Specialty AS SP ON S.SpecialtyId=SP.Id) INNER JOIN WeekSchedule AS WS ON S.Id = WS.ScheduleRecordId) INNER JOIN LessonType AS LT ON S.LessonTypeId = LT.Id "
+            ;
         public static string ScheduleForWeekQuery(int weekNumber)
         {
             var query = scheduleForWeek;
             query += "WHERE WeekNumber = " + weekNumber + OrderByDayLessonSubject;
             return query;
         }
+
+        public static string TeacherScheduleForAllWeeksQuery(string teacher, string initials)
+        {
+            var query = teacherScheduleForAllWeeks;
+            query += "WHERE T.[LastName] = \"" + teacher + "\" AND T.[Initials] = \"" + initials + "\"" + OrderByDayLessonSubject;
+            return query;
+        }
+
+        public static string TeacherScheduleForAllWeekQuery(string teacher, string initials, int weekNumber)
+        {
+            var query = teacherScheduleForWeek;
+            query += "WHERE T.[LastName] = \"" + teacher + "\" AND T.[Initials] = \"" + initials + "\" AND WeekNumber = "+ weekNumber + OrderByDayLessonSubject;
+             return query;
+        }
+
 
         public static string LessonScheduleByCourseSpecialtySubjectQuery(string specialty, int yearOfStudying, string subject)
         {

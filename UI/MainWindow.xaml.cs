@@ -41,10 +41,17 @@ namespace UI
         private void InitializeListeners()
         {
             MethodistListeners();
+            TeachersListeners();
             SettingsListeners();
             searchBtn.Click += OnSearchBtnClick;
             exportBtn.Click += OnExportBtnClick;
             clearDbButton.Click += OnClearDbClick;
+        }
+
+        private void TeachersListeners()
+        {
+            teacherSubjectScheduleQuery.Selected += teacherSubjectScheduleQuerySelected;
+            teacherScheduleQuery.Selected += teacherScheduleQuerySelected;
         }
 
         private void SettingsListeners()
@@ -135,11 +142,7 @@ namespace UI
             }
         }
 
-        private void MethodistQuery2Selected(object sender, RoutedEventArgs e)
-        {
-            methoditsParamsQuery1.Visibility = Visibility.Collapsed; 
-            methoditsParamsQuery2.Visibility = Visibility.Visible;
-        }
+       
 
         private void SetUiState(bool state)
         {
@@ -158,6 +161,25 @@ namespace UI
         {
             methoditsParamsQuery1.Visibility = Visibility.Visible; 
             methoditsParamsQuery2.Visibility = Visibility.Collapsed;
+        }
+
+        private void MethodistQuery2Selected(object sender, RoutedEventArgs e)
+        {
+            methoditsParamsQuery1.Visibility = Visibility.Collapsed;
+            methoditsParamsQuery2.Visibility = Visibility.Visible;
+        }
+
+        private void teacherSubjectScheduleQuerySelected(object sender, RoutedEventArgs e)
+        {
+            teacherSubjectScheduleParams.Visibility = Visibility.Visible;
+            teacherScheduleParams.Visibility = Visibility.Collapsed;
+        }
+
+        private void teacherScheduleQuerySelected(object sender, RoutedEventArgs e)
+        {
+            teacherScheduleParams.Visibility = Visibility.Visible;
+            teacherSubjectScheduleParams.Visibility = Visibility.Collapsed;
+           
         }
 
         private void OnExportBtnClick(object sender, RoutedEventArgs e)
@@ -223,9 +245,16 @@ namespace UI
                 } else if (mquery2.IsSelected)
                 {
                     var dataTable = GetScheduleForWeek();
+                    if (dataTable == null)
+                    {
+                        return;
+                    }
                     if (dataTable.Rows.Count > 1)
                     {
                         header = GetMquery2Header();
+                    } else 
+                    {
+                        ShowPopup("По заданим даним немає інформації");
                     }
                     SetDataView(header, dataTable);
                 }
@@ -234,6 +263,8 @@ namespace UI
                 if (teacherSubjectScheduleQuery.IsSelected)
                 {
                     var dataTable = GetSubjectSchedule();
+                    if (dataTable == null)
+                        return;
                     if (dataTable.Rows.Count < 1)
                     {
                         ShowPopup("По заданим даним немає інформації");
@@ -243,9 +274,55 @@ namespace UI
                         header = GetSubjectScheduleHeader();
                     }
                     SetDataView(header, dataTable);
+                }else if (teacherScheduleQuery.IsSelected)
+                {
+                    var dataTable = GetTeacherScheduleForWeek();
+                    if (dataTable == null)
+                        return;
+                    if (dataTable.Rows.Count < 1)
+                    {
+                        ShowPopup("По заданим даним немає інформації");
+                    }
+                    else
+                    {
+                        header = GetTeacherScheduleHeader();
+                    }
+                    SetDataView(header, dataTable);
                 }
             }
 
+        }
+
+        private string GetTeacherScheduleHeader()
+        {
+            var teacher = teacherNameSelect.Text;
+            var weekNumberStr = teacherWeekSelect.Text;
+
+            return string.Format("Розклад для {0} на {1}", teacher, weekNumberStr);
+        }
+
+        private DataTable GetTeacherScheduleForWeek()
+        {
+            var weekNumberStr = teacherWeekSelect.Text;
+            var teacher = teacherNameSelect.Text;
+
+            if (string.IsNullOrEmpty(weekNumberStr) || string.IsNullOrEmpty(teacher))
+            {
+                ShowPopup("Виберіть всі параметри");
+                return null;
+            }
+
+            var spaceIndex = teacher.IndexOf(" ");
+            var lastName = teacher.Substring(0, spaceIndex);
+            var initials = teacher.Substring(spaceIndex + 1, teacher.Length - spaceIndex - 1);
+
+            if (weekNumberStr == "Всі тижні")
+            {
+                return QueryManager.GetTeacherScheduleForAllWeeks(lastName, initials);
+            }
+
+            var weekNumber = int.Parse(weekNumberStr.Substring(0, weekNumberStr.IndexOf(" ")));
+            return QueryManager.GetTeacherScheduleForSelectedWeek(lastName, initials, weekNumber);
         }
 
         private string GetSubjectScheduleHeader()
@@ -303,7 +380,7 @@ namespace UI
             if (string.IsNullOrEmpty(chosenWeeks))
             {
                 ShowPopup("Виберіть номер тижня");
-                return new DataTable();
+                return null;
             }
 
             var weekNumber = int.Parse(chosenWeeks.Substring(0, chosenWeeks.IndexOf(" ")));
@@ -333,8 +410,8 @@ namespace UI
 
             if (string.IsNullOrEmpty(specialty) || string.IsNullOrEmpty(subject) || yearOfStudying == null)
             {
-                ShowPopup("Вкажіть всі фільтри");
-                return new DataTable();
+                ShowPopup("Виберіть всі параметри");
+                return null;
             }
             else
             {
@@ -342,7 +419,6 @@ namespace UI
                 specialty = specialty.Replace("\"", "\"\"");
                 return QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"" + specialty + "\"", (int) yearOfStudying , "\"" + subject + "\"");
             }
-
 
         }
     
@@ -380,7 +456,17 @@ namespace UI
             teacherSpecialtyCb.ItemsSource = SpecialtyDao.GetAllSpecialties();
             teacherSubjectCb.ItemsSource = ScheduleRecordDao.GetAllSubjects();
             teacherYearOfStudyingCb.ItemsSource = ScheduleRecordDao.GetAllYears();
-            mquery2Weeks.ItemsSource = WeeksDao.GetFormattedWeeks();
+            var allWeeks = WeeksDao.GetFormattedWeeks();
+            mquery2Weeks.ItemsSource = allWeeks;
+
+            var selectWeeks = new string[allWeeks.Length + 1];
+            selectWeeks[0] = "Всі тижні";
+            Array.Copy(allWeeks,0, selectWeeks, 1, allWeeks.Length);
+            teacherWeekSelect.ItemsSource = selectWeeks;
+            teacherWeekSelect.SelectedIndex = 0;
+
+            teacherNameSelect.ItemsSource = TeacherDao.GetFormattedTeachers();
+
         }
 
         private void addExcelBtn_Click(object sender, RoutedEventArgs e)
