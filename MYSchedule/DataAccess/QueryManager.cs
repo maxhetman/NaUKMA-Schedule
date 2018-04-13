@@ -54,9 +54,31 @@ namespace MYSchedule.DataAccess
             return DT;
         }
 
+        public static DataTable GetStudentScheduleForAllWeeks(string specialtyName)
+        {
+            string query = Queries.StudentScheduleForAllWeeksQuery(specialtyName);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
         public static DataTable GetTeacherScheduleForSelectedWeek(string teacherLastName, string initials, int weekNumber)
         {
-            string query = Queries.TeacherScheduleForAllWeekQuery(teacherLastName, initials, weekNumber);
+            string query = Queries.TeacherScheduleForSelectedWeekQuery(teacherLastName, initials, weekNumber);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
+        public static DataTable GetStudentScheduleForSelectedWeek(string specialty, int week)
+        {
+            string query = Queries.StudentScheduleForSelectedWeekQuery(specialty, week);
 
             DataTable DT = Access2Dt(query);
 

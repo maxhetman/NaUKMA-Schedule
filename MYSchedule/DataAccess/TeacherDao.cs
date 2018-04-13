@@ -12,7 +12,7 @@ namespace MYSchedule.DataAccess
 
         private const string getTeacher = "Select Id From Teacher Where LastName = @LastName AND Initials = @Initials";
 
-        private const string getAllTeachers = "Select LastName, Initials From Teacher";
+        private const string getAllTeachers = "Select LastName, Initials From Teacher ORDER BY LastName";
 
         public static int AddIfNotExists(TeacherDto teacher)
         {

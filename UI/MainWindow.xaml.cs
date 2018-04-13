@@ -52,6 +52,7 @@ namespace UI
         private void StudentsListeners()
         {
             studentSubjectScheduleQuery.Selected += studentSubjectScheduleQuerySelected;
+            studentScheduleQuery.Selected += studentScheduleQuerySelected;
         }
 
         private void TeachersListeners()
@@ -183,14 +184,21 @@ namespace UI
 
         private void studentSubjectScheduleQuerySelected(object sender, RoutedEventArgs e)
         {
-            //todo: toggle queires params
+            studentSubjectScheduleParams.Visibility = Visibility.Visible;
+            studentScheduleParams.Visibility = Visibility.Collapsed;
         }
 
         private void teacherScheduleQuerySelected(object sender, RoutedEventArgs e)
         {
             teacherScheduleParams.Visibility = Visibility.Visible;
-            teacherSubjectScheduleParams.Visibility = Visibility.Collapsed;
-           
+            teacherSubjectScheduleParams.Visibility = Visibility.Collapsed;         
+        }
+
+
+        private void studentScheduleQuerySelected(object sender, RoutedEventArgs e)
+        {
+            studentScheduleParams.Visibility = Visibility.Visible;
+            studentSubjectScheduleParams.Visibility = Visibility.Collapsed;
         }
 
         private void OnExportBtnClick(object sender, RoutedEventArgs e)
@@ -278,6 +286,7 @@ namespace UI
                     } else 
                     {
                         header = GetMquery2Header();
+
                     }
                     SetDataView(header, dataTable);
                 }
@@ -299,7 +308,7 @@ namespace UI
                     SetDataView(header, dataTable);
                 }else if (teacherScheduleQuery.IsSelected)
                 {
-                    var dataTable = GetTeacherScheduleForWeek();
+                    var dataTable = GetTeacherSchedule();
                     if (dataTable == null)
                         return;
                     if (dataTable.Rows.Count < 1)
@@ -328,6 +337,20 @@ namespace UI
                         header = GetSubjectScheduleHeaderStudentTab();
                     }
                     SetDataView(header, dataTable);
+                } else if (studentScheduleQuery.IsSelected)
+                {
+                    var dataTable = GetStudentSchedule();
+                    if (dataTable == null)
+                        return;
+                    if (dataTable.Rows.Count < 1)
+                    {
+                        ShowPopup("По заданим даним немає інформації");
+                    }
+                    else
+                    {
+                        header = GetStudentScheduleHeader();
+                    }
+                    SetDataView(header, dataTable);
                 }
             }
 
@@ -341,7 +364,36 @@ namespace UI
             return string.Format("Розклад для {0} на {1}", teacher, weekNumberStr);
         }
 
-        private DataTable GetTeacherScheduleForWeek()
+        private string GetStudentScheduleHeader()
+        {
+            var specialty = studentSpecialtySelect.Text;
+            var weekNumberStr = studentWeekSelect.Text;
+
+            return string.Format("{0}, {1}", specialty, weekNumberStr);
+        }
+
+        private DataTable GetStudentSchedule()
+        {
+            var weekNumberStr = studentWeekSelect.Text;
+            var specialty = studentSpecialtySelect.Text;
+
+            if (string.IsNullOrEmpty(weekNumberStr) || string.IsNullOrEmpty(specialty))
+            {
+                ShowPopup("Виберіть всі параметри");
+                return null;
+            }
+
+            specialty = specialty.Replace("\"", "\"\"");
+
+            if (weekNumberStr == "Всі тижні")
+            {
+                return QueryManager.GetStudentScheduleForAllWeeks(specialty);
+            }
+            var weekNumber = int.Parse(weekNumberStr.Substring(0, weekNumberStr.IndexOf(" ")));
+            return QueryManager.GetStudentScheduleForSelectedWeek(specialty, weekNumber);
+        }
+
+        private DataTable GetTeacherSchedule()
         {
             var weekNumberStr = teacherWeekSelect.Text;
             var teacher = teacherNameSelect.Text;
@@ -507,7 +559,8 @@ namespace UI
 
             int? building = string.IsNullOrEmpty(buildings.Text) ? (int?) null : int.Parse(buildings.Text);
             var isComputer = showComputerClassrooms.IsChecked;
-            var classRoomNumber = classRoomNumbers.Text;            
+            var classRoomNumber = classRoomNumbers.Text;
+            var isShowAllClassroms = showAllClassroms.IsChecked;
 
             if (isComputer != true)
             {
@@ -519,7 +572,7 @@ namespace UI
                 classRoomNumber = null;
             }
 
-            if (building == null && isComputer == null && classRoomNumber == null)
+            if (building == null && isComputer == null && classRoomNumber == null && isShowAllClassroms != true)
             {
                 ShowPopup("Виберіть хоча б один параметр пошуку");
                 return null;
@@ -545,7 +598,6 @@ namespace UI
             studentSubjectCb.ItemsSource = allSubjects;
             studentYearOfStudyingCb.ItemsSource = allYears;
 
-
             var allWeeks = WeeksDao.GetFormattedWeeks();
             mquery2Weeks.ItemsSource = allWeeks;
 
@@ -557,22 +609,20 @@ namespace UI
 
             teacherNameSelect.ItemsSource = TeacherDao.GetFormattedTeachers();
 
+            studentWeekSelect.ItemsSource = selectWeeks;
+            studentWeekSelect.SelectedIndex = 0;
+            studentSpecialtySelect.ItemsSource = allSpecialties;
         }
 
         private void addExcelBtn_Click(object sender, RoutedEventArgs e)
         {
-                // Create OpenFileDialog 
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.Multiselect = true;
 
-                // Set filter for file extension and default file extension 
-         //   dlg.Filter = "Excel (*.xls, *.xlt, *.xlm)";
             dlg.Filter = "Excel Files(*.xls;*.xlt;*.xlm;*.xlsx;*.xlsm)|*.xls;*.xlt;*.xlm;*.xlsx;*.xlsm";
 
-            // Display OpenFileDialog by calling ShowDialog method 
             Nullable<bool> result = dlg.ShowDialog();
 
-            // Get the selected file name and display in a TextBox 
             if (result == true)
             {
                 // Open document 
