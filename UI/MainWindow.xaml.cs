@@ -81,7 +81,13 @@ namespace UI
 
         private void OnClearDbClick(object sender, RoutedEventArgs e)
         {
-            DBAccessManager.ClearDataBase();
+            var resut = MessageBox.Show("Ви впевнені, що хочете видалити дані?", "Розклад", MessageBoxButton.YesNo);
+            if (resut == MessageBoxResult.Yes)
+            {
+                DBAccessManager.ClearDataBase();
+                ShowPopup("Дані видалено");
+                FillDropDownsInfo();
+            }
         }
 
         private void MethodistListeners()

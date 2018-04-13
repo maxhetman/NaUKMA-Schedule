@@ -167,7 +167,7 @@ namespace MYSchedule.ExcelExport
                 var weekXCoord = currentTeacherCell.x-1;
                 var weekYCoord = WeekNumberCellIndex[weekNumber].y;
 
-                worksheet.Cells[weekXCoord, weekYCoord] = dataRow[6].ToString() + dataRow[7].ToString();
+                worksheet.Cells[weekXCoord, weekYCoord] = dataRow[6].ToString() + " "+ dataRow[7].ToString();
 
                // Console.WriteLine($"{dataRow[0]}, {dataRow[1]}, {dataRow[2]}, {dataRow[3]}, {dataRow[4]}, {dataRow[5]}, {dataRow[6]}");
 
