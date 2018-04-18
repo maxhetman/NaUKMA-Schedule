@@ -2,7 +2,9 @@
 {
     public static class Queries
     {
-        private const string classroomsBusyness = @"Select D.DayName AS День, L.LessonTimePeriod AS Пара, S.ClassRoomNumber AS Аудиторія, T.LastName, T.Initials, S.Weeks From ((((ScheduleRecord S Inner Join [Day] D ON S.DayNumber = D.DayNumber) Inner Join Teacher T ON S.TeacherId = T.Id) Inner Join ClassRoom C ON S.ClassRoomNumber = C.Number) Inner Join LessonTime L ON S.LessonTimeNumber = L.Number) ";
+        private const string classroomsAvailabilityForAllWeeks = @"Select D.DayName AS День, L.LessonTimePeriod AS Пара, S.ClassRoomNumber AS Аудиторія, T.LastName, T.Initials, S.Weeks AS Тижні From ((((ScheduleRecord S Inner Join [Day] D ON S.DayNumber = D.DayNumber) Inner Join Teacher T ON S.TeacherId = T.Id) Inner Join ClassRoom C ON S.ClassRoomNumber = C.Number) Inner Join LessonTime L ON S.LessonTimeNumber = L.Number) ";
+
+        private const string classroomsAvailabilityForSelectedWeek = @"Select D.DayName AS День, L.LessonTimePeriod AS Пара, S.ClassRoomNumber AS Аудиторія, T.LastName, T.Initials, WS.WeekNumber AS Тиждень From (((((ScheduleRecord S Inner Join [Day] D ON S.DayNumber = D.DayNumber) Inner Join Teacher T ON S.TeacherId = T.Id) Inner Join ClassRoom C ON S.ClassRoomNumber = C.Number) Inner Join LessonTime L ON S.LessonTimeNumber = L.Number) Inner Join WeekSchedule WS ON S.Id = WS.ScheduleRecordId) ";
 
         private const string OrderByLessonTimeClassRoom = " ORDER BY D.DayNumber, L.Number, C.Number";
 
@@ -76,10 +78,10 @@
         }
 
 
-        public static string ClassRoomsAvailabilityQuery(int? buildingNumber, bool? isComputer,
+        public static string ClassRoomsAvailabilityForAllWeeksQuery(int? buildingNumber, bool? isComputer,
             string classroomNumber)
         {
-            var query = classroomsBusyness;
+            var query = classroomsAvailabilityForAllWeeks;
 
             if (buildingNumber != null)
             {
@@ -98,6 +100,38 @@
                 query += "Where C.Number = \"" + classroomNumber + "\"";
             }
 
+            query += OrderByLessonTimeClassRoom;
+            return query;
+        }
+
+        public static string ClassRoomsAvailabilityForSelectedWeekQuery(int? buildingNumber, bool? isComputer,
+            string classroomNumber, int week)
+        {
+            var query = classroomsAvailabilityForSelectedWeek;
+            var filterPartOfQuery = string.Empty;
+
+            if (buildingNumber != null)
+            {
+                filterPartOfQuery += "Where Building = " + buildingNumber;
+            }
+
+            if (isComputer != null)
+            {
+                filterPartOfQuery += buildingNumber == null
+                    ? "Where IsComputerClass = " + isComputer
+                    : " And IsComputerClass = " + isComputer;
+            }
+
+            if (classroomNumber != null)
+            {
+                filterPartOfQuery += "Where C.Number = \"" + classroomNumber + "\"";
+            }
+
+            filterPartOfQuery = filterPartOfQuery == string.Empty
+                ? "Where WS.WeekNumber = " + week
+                : " And WS.WeekNumber = " + week;
+
+            query += filterPartOfQuery;
             query += OrderByLessonTimeClassRoom;
             return query;
         }

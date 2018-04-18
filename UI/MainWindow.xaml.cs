@@ -66,29 +66,7 @@ namespace UI
             weekDateSelector.SelectedDateChanged += OnFirstWeekDateChanged;
         }
 
-        private void OnFirstWeekDateChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var selectedDate = weekDateSelector.SelectedDate;
 
-            if (selectedDate.Value.DayOfWeek != DayOfWeek.Monday)
-            {
-                ShowPopup("Перший день має бути понеділок!");
-                return;
-            }
-
-            WeeksDao.SetFirstWeekDate((DateTime) weekDateSelector.SelectedDate);
-        }
-
-        private void OnClearDbClick(object sender, RoutedEventArgs e)
-        {
-            var resut = MessageBox.Show("Ви впевнені, що хочете видалити дані?", "Розклад", MessageBoxButton.YesNo);
-            if (resut == MessageBoxResult.Yes)
-            {
-                DBAccessManager.ClearDataBase();
-                ShowPopup("Дані видалено");
-                FillDropDownsInfo();
-            }
-        }
 
         private void MethodistListeners()
         {
@@ -104,6 +82,10 @@ namespace UI
             classroomConsistensy.Selected += CheckClassRoomConsistensy;
             teacherConsistensy.Selected += CheckTeacherConsistensy;
         }
+
+
+
+        #region MouseEventsHandlers
 
         private void CheckTeacherConsistensy(object sender, RoutedEventArgs e)
         {
@@ -144,7 +126,7 @@ namespace UI
 
         private void OnShowAllClassroomToggle(object sender, RoutedEventArgs e)
         {
-            var isAllClassRoomsChecked = (bool) showAllClassroms.IsChecked;
+            var isAllClassRoomsChecked = (bool)showAllClassroms.IsChecked;
             classRoomNumbers.IsEnabled = !isAllClassRoomsChecked;
             buildings.IsEnabled = !isAllClassRoomsChecked;
 
@@ -155,7 +137,10 @@ namespace UI
             }
         }
 
-       
+        #endregion
+
+
+        #region Ui Helpers
 
         private void SetUiState(bool state)
         {
@@ -172,7 +157,7 @@ namespace UI
 
         private void MethodistQuery1Selected(object sender, RoutedEventArgs e)
         {
-            methoditsParamsQuery1.Visibility = Visibility.Visible; 
+            methoditsParamsQuery1.Visibility = Visibility.Visible;
             methoditsParamsQuery2.Visibility = Visibility.Collapsed;
         }
 
@@ -197,7 +182,7 @@ namespace UI
         private void teacherScheduleQuerySelected(object sender, RoutedEventArgs e)
         {
             teacherScheduleParams.Visibility = Visibility.Visible;
-            teacherSubjectScheduleParams.Visibility = Visibility.Collapsed;         
+            teacherSubjectScheduleParams.Visibility = Visibility.Collapsed;
         }
 
 
@@ -205,6 +190,283 @@ namespace UI
         {
             studentScheduleParams.Visibility = Visibility.Visible;
             studentSubjectScheduleParams.Visibility = Visibility.Collapsed;
+        }
+
+        #endregion
+
+        #region methodist queries
+
+        private DataTable GetAvailableClassRooms()
+        {
+            DataTable classRooms = null;
+
+            int? building = string.IsNullOrEmpty(buildings.Text) ? (int?)null : int.Parse(buildings.Text);
+            var isComputer = showComputerClassrooms.IsChecked;
+            var classRoomNumber = classRoomNumbers.Text;
+            var isShowAllClassroms = showAllClassroms.IsChecked;
+            var weekNumberStr = mquery1Weeks.Text;
+
+            if (isComputer != true)
+            {
+                isComputer = null;
+            }
+
+            if (classRoomNumber == string.Empty)
+            {
+                classRoomNumber = null;
+            }
+
+            if (building == null && isComputer == null && classRoomNumber == null && isShowAllClassroms != true)
+            {
+                ShowPopup("Виберіть хоча б один параметр пошуку");
+                return null;
+            }
+
+            if (weekNumberStr == "Всі тижні")
+            {
+                return QueryManager.GetClassRoomsAvailabilityForAllWeeks(classroomNumber: classRoomNumber, buildingNumber: building, isComputer: isComputer);
+               
+            }
+
+              var weekNumber = int.Parse(weekNumberStr.Substring(0, weekNumberStr.IndexOf(" ")));
+
+            return QueryManager.GetClassRoomsAvailabilityForSelectedweek(week: weekNumber,
+                classroomNumber: classRoomNumber, buildingNumber: building, isComputer: isComputer);
+
+        }
+
+        private DataTable GetScheduleForWeek()
+        {
+            string chosenWeeks = mquery2Weeks.Text;
+
+            if (string.IsNullOrEmpty(chosenWeeks))
+            {
+                ShowPopup("Виберіть номер тижня");
+                return null;
+            }
+
+            var weekNumber = int.Parse(chosenWeeks.Substring(0, chosenWeeks.IndexOf(" ")));
+            var dataTable = QueryManager.GetScheduleForWeek(weekNumber);
+
+            if (!string.IsNullOrEmpty(chosenWeeks) && dataTable.Rows.Count < 1)
+            {
+                ShowPopup("По заданим даним немає інформації");
+            }
+
+            return dataTable;
+        }
+
+        private string GetMquery2Header()
+        {
+            return "Розклад на " + mquery2Weeks.Text;
+        }
+
+        private string GetMquery1Header()
+        {
+            int? building = string.IsNullOrEmpty(buildings.Text) ? (int?)null : int.Parse(buildings.Text);
+            var isComputer = showComputerClassrooms.IsChecked;
+            var classRoomNumber = classRoomNumbers.Text;
+
+            if (isComputer != true)
+            {
+                isComputer = null;
+            }
+
+            if (classRoomNumber == string.Empty)
+            {
+                classRoomNumber = null;
+            }
+
+            if (!string.IsNullOrEmpty(classRoomNumber))
+            {
+                return string.Format("Зайнятість аудиторії {0}", classRoomNumber);
+            }
+
+            var classroomType = isComputer == null ? " " : " комп`ютерних ";
+            var header = string.Format("Зайнятість{0}аудиторій ", classroomType);
+
+            if (building != null)
+            {
+                header += string.Format("{0} корпусу ", building);
+            }
+
+            return header;
+        }
+
+
+        #endregion
+
+        #region teacher queries
+
+        private string GetTeacherScheduleHeader()
+        {
+            var teacher = teacherNameSelect.Text;
+            var weekNumberStr = teacherWeekSelect.Text;
+
+            return string.Format("Розклад для {0} на {1}", teacher, weekNumberStr);
+        }
+
+        private DataTable GetTeacherSchedule()
+        {
+            var weekNumberStr = teacherWeekSelect.Text;
+            var teacher = teacherNameSelect.Text;
+
+            if (string.IsNullOrEmpty(weekNumberStr) || string.IsNullOrEmpty(teacher))
+            {
+                ShowPopup("Виберіть всі параметри");
+                return null;
+            }
+
+            var spaceIndex = teacher.IndexOf(" ");
+            var lastName = teacher.Substring(0, spaceIndex);
+            var initials = teacher.Substring(spaceIndex + 1, teacher.Length - spaceIndex - 1);
+
+            if (weekNumberStr == "Всі тижні")
+            {
+                return QueryManager.GetTeacherScheduleForAllWeeks(lastName, initials);
+            }
+
+            var weekNumber = int.Parse(weekNumberStr.Substring(0, weekNumberStr.IndexOf(" ")));
+            return QueryManager.GetTeacherScheduleForSelectedWeek(lastName, initials, weekNumber);
+        }
+
+        private string GetSubjectScheduleHeaderTeacherTab()
+        {
+            var specialty = teacherSpecialtyCb.Text;
+            int? yearOfStudying = string.IsNullOrEmpty(teacherYearOfStudyingCb.Text)
+                ? (int?)null
+                : int.Parse(teacherYearOfStudyingCb.Text);
+            var subject = teacherSubjectCb.Text;
+
+            return string.Format("{0}, {1} курс, {2}", specialty, yearOfStudying, subject);
+        }
+
+        private DataTable GetSubjectScheduleTeacherTab()
+        {
+            var specialty = teacherSpecialtyCb.Text;
+            int? yearOfStudying = string.IsNullOrEmpty(teacherYearOfStudyingCb.Text)
+                ? (int?)null
+                : int.Parse(teacherYearOfStudyingCb.Text);
+            var subject = teacherSubjectCb.Text;
+
+            if (string.IsNullOrEmpty(specialty) || string.IsNullOrEmpty(subject) || yearOfStudying == null)
+            {
+                ShowPopup("Виберіть всі параметри");
+                return null;
+            }
+            else
+            {
+                //sorry for this
+                specialty = specialty.Replace("\"", "\"\"");
+                return QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"" + specialty + "\"", (int)yearOfStudying, "\"" + subject + "\"");
+            }
+
+        }
+
+        #endregion
+
+        #region student queries
+
+        private DataTable GetSubjectScheduleStudentsTab()
+        {
+            var specialty = studentSpecialtyCb.Text;
+            int? yearOfStudying = string.IsNullOrEmpty(studentYearOfStudyingCb.Text)
+                ? (int?)null
+                : int.Parse(studentYearOfStudyingCb.Text);
+            var subject = studentSubjectCb.Text;
+
+            if (string.IsNullOrEmpty(specialty) || string.IsNullOrEmpty(subject) || yearOfStudying == null)
+            {
+                ShowPopup("Виберіть всі параметри");
+                return null;
+            }
+            else
+            {
+                //sorry for this
+                specialty = specialty.Replace("\"", "\"\"");
+                return QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"" + specialty + "\"", (int)yearOfStudying, "\"" + subject + "\"");
+            }
+
+        }
+
+        private string GetSubjectScheduleHeaderStudentTab()
+        {
+            var specialty = studentSpecialtyCb.Text;
+            int? yearOfStudying = string.IsNullOrEmpty(studentYearOfStudyingCb.Text)
+                ? (int?)null
+                : int.Parse(studentYearOfStudyingCb.Text);
+            var subject = studentSubjectCb.Text;
+
+            return string.Format("{0}, {1} курс, {2}", specialty, yearOfStudying, subject);
+        }
+
+        private string GetStudentScheduleHeader()
+        {
+            var specialty = studentSpecialtySelect.Text;
+            var weekNumberStr = studentWeekSelect.Text;
+
+            return string.Format("{0}, {1}", specialty, weekNumberStr);
+        }
+
+        private DataTable GetStudentSchedule()
+        {
+            var weekNumberStr = studentWeekSelect.Text;
+            var specialty = studentSpecialtySelect.Text;
+
+            if (string.IsNullOrEmpty(weekNumberStr) || string.IsNullOrEmpty(specialty))
+            {
+                ShowPopup("Виберіть всі параметри");
+                return null;
+            }
+
+            specialty = specialty.Replace("\"", "\"\"");
+
+            if (weekNumberStr == "Всі тижні")
+            {
+                return QueryManager.GetStudentScheduleForAllWeeks(specialty);
+            }
+            var weekNumber = int.Parse(weekNumberStr.Substring(0, weekNumberStr.IndexOf(" ")));
+            return QueryManager.GetStudentScheduleForSelectedWeek(specialty, weekNumber);
+        }
+
+        #endregion
+
+        #region Common
+
+        private void FillDropDownsInfo()
+        {
+            buildings.ItemsSource = ClassRoomsDao.GetAllBuildings();
+            classRoomNumbers.ItemsSource = ClassRoomsDao.GetAllNumbers();
+
+            var allSpecialties = SpecialtyDao.GetAllSpecialties();
+            var allSubjects = ScheduleRecordDao.GetAllSubjects();
+            var allYears = ScheduleRecordDao.GetAllYears();
+
+            teacherSpecialtyCb.ItemsSource = allSpecialties;
+            teacherSubjectCb.ItemsSource = allSubjects;
+            teacherYearOfStudyingCb.ItemsSource = allYears;
+
+            studentSpecialtyCb.ItemsSource = allSpecialties;
+            studentSubjectCb.ItemsSource = allSubjects;
+            studentYearOfStudyingCb.ItemsSource = allYears;
+
+            var allWeeks = WeeksDao.GetFormattedWeeks();
+            mquery2Weeks.ItemsSource = allWeeks;
+
+            var selectWeeks = new string[allWeeks.Length + 1];
+            selectWeeks[0] = "Всі тижні";
+            Array.Copy(allWeeks, 0, selectWeeks, 1, allWeeks.Length);
+            teacherWeekSelect.ItemsSource = selectWeeks;
+            teacherWeekSelect.SelectedIndex = 0;
+
+            mquery1Weeks.ItemsSource = selectWeeks;
+            mquery1Weeks.SelectedIndex = 0;
+
+            teacherNameSelect.ItemsSource = TeacherDao.GetFormattedTeachers();
+
+            studentWeekSelect.ItemsSource = selectWeeks;
+            studentWeekSelect.SelectedIndex = 0;
+            studentSpecialtySelect.ItemsSource = allSpecialties;
         }
 
         private void OnExportBtnClick(object sender, RoutedEventArgs e)
@@ -245,18 +507,10 @@ namespace UI
 
             loader.Visibility = Visibility.Visible;
             SetUiState(false);
-            ExportExcelWorker.RunWorkerAsync(new object[]{exportDelegate, CurrentData, dataViewHeader.Content});
+            ExportExcelWorker.RunWorkerAsync(new object[] { exportDelegate, CurrentData, dataViewHeader.Content });
         }
 
-        private DataTable CurrentData
-        {
-            get
-            {
-                var itemsSource = (DataView) dataView.ItemsSource;
-                return itemsSource?.ToTable();
-            }
-        }
-
+           // when is query is selected and filter parameters are set
         private void OnSearchBtnClick(object sender, RoutedEventArgs e)
         {
             var header = string.Empty;
@@ -279,7 +533,8 @@ namespace UI
                         header = GetMquery1Header();
                     }
                     SetDataView(header, dataTable);
-                } else if (mquery2.IsSelected)
+                }
+                else if (mquery2.IsSelected)
                 {
                     var dataTable = GetScheduleForWeek();
                     if (dataTable == null)
@@ -289,14 +544,16 @@ namespace UI
                     if (dataTable.Rows.Count < 1)
                     {
                         ShowPopup("По заданим даним немає інформації");
-                    } else 
+                    }
+                    else
                     {
                         header = GetMquery2Header();
 
                     }
                     SetDataView(header, dataTable);
                 }
-            } else if (teacherTab.IsSelected)
+            }
+            else if (teacherTab.IsSelected)
             {
                 if (teacherSubjectScheduleQuery.IsSelected)
                 {
@@ -312,7 +569,8 @@ namespace UI
                         header = GetSubjectScheduleHeaderTeacherTab();
                     }
                     SetDataView(header, dataTable);
-                }else if (teacherScheduleQuery.IsSelected)
+                }
+                else if (teacherScheduleQuery.IsSelected)
                 {
                     var dataTable = GetTeacherSchedule();
                     if (dataTable == null)
@@ -327,7 +585,8 @@ namespace UI
                     }
                     SetDataView(header, dataTable);
                 }
-            } else if (studentTab.IsSelected)
+            }
+            else if (studentTab.IsSelected)
             {
                 if (studentSubjectScheduleQuery.IsSelected)
                 {
@@ -343,7 +602,8 @@ namespace UI
                         header = GetSubjectScheduleHeaderStudentTab();
                     }
                     SetDataView(header, dataTable);
-                } else if (studentScheduleQuery.IsSelected)
+                }
+                else if (studentScheduleQuery.IsSelected)
                 {
                     var dataTable = GetStudentSchedule();
                     if (dataTable == null)
@@ -360,264 +620,6 @@ namespace UI
                 }
             }
 
-        }
-
-        private string GetTeacherScheduleHeader()
-        {
-            var teacher = teacherNameSelect.Text;
-            var weekNumberStr = teacherWeekSelect.Text;
-
-            return string.Format("Розклад для {0} на {1}", teacher, weekNumberStr);
-        }
-
-        private string GetStudentScheduleHeader()
-        {
-            var specialty = studentSpecialtySelect.Text;
-            var weekNumberStr = studentWeekSelect.Text;
-
-            return string.Format("{0}, {1}", specialty, weekNumberStr);
-        }
-
-        private DataTable GetStudentSchedule()
-        {
-            var weekNumberStr = studentWeekSelect.Text;
-            var specialty = studentSpecialtySelect.Text;
-
-            if (string.IsNullOrEmpty(weekNumberStr) || string.IsNullOrEmpty(specialty))
-            {
-                ShowPopup("Виберіть всі параметри");
-                return null;
-            }
-
-            specialty = specialty.Replace("\"", "\"\"");
-
-            if (weekNumberStr == "Всі тижні")
-            {
-                return QueryManager.GetStudentScheduleForAllWeeks(specialty);
-            }
-            var weekNumber = int.Parse(weekNumberStr.Substring(0, weekNumberStr.IndexOf(" ")));
-            return QueryManager.GetStudentScheduleForSelectedWeek(specialty, weekNumber);
-        }
-
-        private DataTable GetTeacherSchedule()
-        {
-            var weekNumberStr = teacherWeekSelect.Text;
-            var teacher = teacherNameSelect.Text;
-
-            if (string.IsNullOrEmpty(weekNumberStr) || string.IsNullOrEmpty(teacher))
-            {
-                ShowPopup("Виберіть всі параметри");
-                return null;
-            }
-
-            var spaceIndex = teacher.IndexOf(" ");
-            var lastName = teacher.Substring(0, spaceIndex);
-            var initials = teacher.Substring(spaceIndex + 1, teacher.Length - spaceIndex - 1);
-
-            if (weekNumberStr == "Всі тижні")
-            {
-                return QueryManager.GetTeacherScheduleForAllWeeks(lastName, initials);
-            }
-
-            var weekNumber = int.Parse(weekNumberStr.Substring(0, weekNumberStr.IndexOf(" ")));
-            return QueryManager.GetTeacherScheduleForSelectedWeek(lastName, initials, weekNumber);
-        }
-
-        private string GetSubjectScheduleHeaderTeacherTab()
-        {
-            var specialty = teacherSpecialtyCb.Text;
-            int? yearOfStudying = string.IsNullOrEmpty(teacherYearOfStudyingCb.Text)
-                ? (int?)null
-                : int.Parse(teacherYearOfStudyingCb.Text);
-            var subject = teacherSubjectCb.Text;
-
-            return string.Format("{0}, {1} курс, {2}", specialty, yearOfStudying, subject);
-        }
-
-        private string GetSubjectScheduleHeaderStudentTab()
-        {
-            var specialty = studentSpecialtyCb.Text;
-            int? yearOfStudying = string.IsNullOrEmpty(studentYearOfStudyingCb.Text)
-                ? (int?)null
-                : int.Parse(studentYearOfStudyingCb.Text);
-            var subject = studentSubjectCb.Text;
-
-            return string.Format("{0}, {1} курс, {2}", specialty, yearOfStudying, subject);
-        }
-
-        private string GetMquery2Header()
-        {
-            return "Розклад на " + mquery2Weeks.Text;
-        }
-
-        private string GetMquery1Header()
-        {
-            int? building = string.IsNullOrEmpty(buildings.Text) ? (int?) null : int.Parse(buildings.Text);
-            var isComputer = showComputerClassrooms.IsChecked;
-            var classRoomNumber = classRoomNumbers.Text;
-
-            if (isComputer != true)
-            {
-                isComputer = null;
-            }
-
-            if (classRoomNumber == string.Empty)
-            {
-                classRoomNumber = null;
-            }
-
-            if (!string.IsNullOrEmpty(classRoomNumber))
-            {
-                return string.Format("Зайнятість аудиторії {0}", classRoomNumber);
-            }
-
-            var classroomType = isComputer == null ? " " : " комп`ютерних ";
-            var header = string.Format("Зайнятість{0}аудиторій ", classroomType);
-
-            if (building != null)
-            {
-                header += string.Format("{0} корпусу ", building);
-            }
-
-            return header;
-        }
-
-        private DataTable GetScheduleForWeek()
-        {
-            string chosenWeeks = mquery2Weeks.Text;
-
-            if (string.IsNullOrEmpty(chosenWeeks))
-            {
-                ShowPopup("Виберіть номер тижня");
-                return null;
-            }
-
-            var weekNumber = int.Parse(chosenWeeks.Substring(0, chosenWeeks.IndexOf(" ")));
-            var dataTable =  QueryManager.GetScheduleForWeek(weekNumber);
-
-            if (!string.IsNullOrEmpty(chosenWeeks) && dataTable.Rows.Count < 1)
-            {
-                ShowPopup("По заданим даним немає інформації");
-            }
-            
-            return dataTable;
-        }
-
-        private void SetDataView(string header, DataTable dataTable)
-        {
-            dataViewHeader.Content = header;
-            dataView.DataContext = dataTable;
-        }
-
-        private  DataTable GetSubjectScheduleTeacherTab()
-        {
-            var specialty = teacherSpecialtyCb.Text;
-            int? yearOfStudying = string.IsNullOrEmpty(teacherYearOfStudyingCb.Text)
-                ? (int?) null
-                : int.Parse(teacherYearOfStudyingCb.Text);
-            var subject = teacherSubjectCb.Text;
-
-            if (string.IsNullOrEmpty(specialty) || string.IsNullOrEmpty(subject) || yearOfStudying == null)
-            {
-                ShowPopup("Виберіть всі параметри");
-                return null;
-            }
-            else
-            {
-                //sorry for this
-                specialty = specialty.Replace("\"", "\"\"");
-                return QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"" + specialty + "\"", (int) yearOfStudying , "\"" + subject + "\"");
-            }
-
-        }
-
-        private DataTable GetSubjectScheduleStudentsTab()
-        {
-            var specialty = studentSpecialtyCb.Text;
-            int? yearOfStudying = string.IsNullOrEmpty(studentYearOfStudyingCb.Text)
-                ? (int?)null
-                : int.Parse(studentYearOfStudyingCb.Text);
-            var subject = studentSubjectCb.Text;
-
-            if (string.IsNullOrEmpty(specialty) || string.IsNullOrEmpty(subject) || yearOfStudying == null)
-            {
-                ShowPopup("Виберіть всі параметри");
-                return null;
-            }
-            else
-            {
-                //sorry for this
-                specialty = specialty.Replace("\"", "\"\"");
-                return QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"" + specialty + "\"", (int)yearOfStudying, "\"" + subject + "\"");
-            }
-
-        }
-
-
-        private void ShowPopup(string message)
-        {
-            MessageBox.Show(message, "Розклад", MessageBoxButton.OK);
-        }
-
-        private DataTable GetAvailableClassRooms()
-        {
-            DataTable classRooms = null;
-
-            int? building = string.IsNullOrEmpty(buildings.Text) ? (int?) null : int.Parse(buildings.Text);
-            var isComputer = showComputerClassrooms.IsChecked;
-            var classRoomNumber = classRoomNumbers.Text;
-            var isShowAllClassroms = showAllClassroms.IsChecked;
-
-            if (isComputer != true)
-            {
-                isComputer = null;
-            }
-
-            if (classRoomNumber == string.Empty)
-            {
-                classRoomNumber = null;
-            }
-
-            if (building == null && isComputer == null && classRoomNumber == null && isShowAllClassroms != true)
-            {
-                ShowPopup("Виберіть хоча б один параметр пошуку");
-                return null;
-            }
-
-            return QueryManager.GetClassRoomsAvailability(classroomNumber:classRoomNumber, buildingNumber:building, isComputer:isComputer);
-        }
-
-        private void FillDropDownsInfo()
-        {
-            buildings.ItemsSource = ClassRoomsDao.GetAllBuildings();
-            classRoomNumbers.ItemsSource = ClassRoomsDao.GetAllNumbers();
-            
-            var allSpecialties = SpecialtyDao.GetAllSpecialties();
-            var allSubjects = ScheduleRecordDao.GetAllSubjects();
-            var allYears = ScheduleRecordDao.GetAllYears();
-
-            teacherSpecialtyCb.ItemsSource = allSpecialties;
-            teacherSubjectCb.ItemsSource = allSubjects;
-            teacherYearOfStudyingCb.ItemsSource = allYears;
-
-            studentSpecialtyCb.ItemsSource = allSpecialties;
-            studentSubjectCb.ItemsSource = allSubjects;
-            studentYearOfStudyingCb.ItemsSource = allYears;
-
-            var allWeeks = WeeksDao.GetFormattedWeeks();
-            mquery2Weeks.ItemsSource = allWeeks;
-
-            var selectWeeks = new string[allWeeks.Length + 1];
-            selectWeeks[0] = "Всі тижні";
-            Array.Copy(allWeeks,0, selectWeeks, 1, allWeeks.Length);
-            teacherWeekSelect.ItemsSource = selectWeeks;
-            teacherWeekSelect.SelectedIndex = 0;
-
-            teacherNameSelect.ItemsSource = TeacherDao.GetFormattedTeachers();
-
-            studentWeekSelect.ItemsSource = selectWeeks;
-            studentWeekSelect.SelectedIndex = 0;
-            studentSpecialtySelect.ItemsSource = allSpecialties;
         }
 
         private void addExcelBtn_Click(object sender, RoutedEventArgs e)
@@ -677,18 +679,64 @@ namespace UI
 
         private void ExportExcelWorkerDoWork(object sender, DoWorkEventArgs e)
         {
-            var parameters = (object[]) e.Argument;
-            var exportDelegate = (Action<string, DataTable>) parameters[0];
-            var currData = (DataTable) parameters[1];
-            var header = (string) parameters[2];
+            var parameters = (object[])e.Argument;
+            var exportDelegate = (Action<string, DataTable>)parameters[0];
+            var currData = (DataTable)parameters[1];
+            var header = (string)parameters[2];
             exportDelegate.Invoke(header, currData);
         }
 
-        private void ExportExcelWorkerCompleted(object sender,RunWorkerCompletedEventArgs e)
+        private void ExportExcelWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             loader.Visibility = Visibility.Hidden;
             SetUiState(true);
         }
+
+        private void SetDataView(string header, DataTable dataTable)
+        {
+            dataViewHeader.Content = header;
+            dataView.DataContext = dataTable;
+        }
+
+        private DataTable CurrentData
+        {
+            get
+            {
+                var itemsSource = (DataView)dataView.ItemsSource;
+                return itemsSource?.ToTable();
+            }
+        }
+
+        private void OnFirstWeekDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedDate = weekDateSelector.SelectedDate;
+
+            if (selectedDate.Value.DayOfWeek != DayOfWeek.Monday)
+            {
+                ShowPopup("Перший день має бути понеділок!");
+                return;
+            }
+
+            WeeksDao.SetFirstWeekDate((DateTime)weekDateSelector.SelectedDate);
+        }
+
+        private void OnClearDbClick(object sender, RoutedEventArgs e)
+        {
+            var resut = MessageBox.Show("Ви впевнені, що хочете видалити дані?", "Розклад", MessageBoxButton.YesNo);
+            if (resut == MessageBoxResult.Yes)
+            {
+                DBAccessManager.ClearDataBase();
+                ShowPopup("Дані видалено");
+                FillDropDownsInfo();
+            }
+        }
+
+        private void ShowPopup(string message)
+        {
+            MessageBox.Show(message, "Розклад", MessageBoxButton.OK);
+        }
+        #endregion
+
 
     }
 }

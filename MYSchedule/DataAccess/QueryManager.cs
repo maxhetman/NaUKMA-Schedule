@@ -9,10 +9,10 @@ namespace MYSchedule.DataAccess
     public static class QueryManager
     {
 
-        public static DataTable GetClassRoomsAvailability(int? buildingNumber = null, bool? isComputer = null,
+        public static DataTable GetClassRoomsAvailabilityForAllWeeks(int? buildingNumber = null, bool? isComputer = null,
             string classroomNumber = null)
         {
-            string query = Queries.ClassRoomsAvailabilityQuery(buildingNumber, isComputer, classroomNumber) ;
+            string query = Queries.ClassRoomsAvailabilityForAllWeeksQuery(buildingNumber, isComputer, classroomNumber) ;
             
             DataTable DT = Access2Dt(query);
 
@@ -20,6 +20,20 @@ namespace MYSchedule.DataAccess
 
             return DT;
         }
+
+        public static DataTable GetClassRoomsAvailabilityForSelectedweek(int week, int? buildingNumber = null, bool? isComputer = null,
+            string classroomNumber = null )
+        {
+            string query = Queries.ClassRoomsAvailabilityForSelectedWeekQuery(buildingNumber, isComputer, classroomNumber, week);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
+
 
         public static DataTable GetScheduleBySubjectSpecialtyAndCourse(string specialty, int course, string subject)
         {

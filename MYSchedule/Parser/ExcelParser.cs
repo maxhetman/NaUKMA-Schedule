@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using LinqToExcel;
 using MYSchedule.DTO;
 using MYSchedule.Utils;
+using Remotion.Mixins.CodeGeneration.DynamicProxy.TypeGeneration;
 
 namespace MYSchedule.Parser
 {
@@ -77,8 +78,13 @@ namespace MYSchedule.Parser
 
                 var weeksString = row[5].Value.ToString();
 
-                if (string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(teacher.LastName)
-                    || string.IsNullOrEmpty(classRoom.Number)
+                if (string.IsNullOrEmpty(teacher.ToString()))
+                {
+                    teacher = new TeacherDto {LastName = "Вакансія"}; // in case of null
+                }
+                    
+
+                if (string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(classRoom.Number)
                     || string.IsNullOrEmpty(weeksString))
                     return;
 
