@@ -68,9 +68,9 @@ namespace MYSchedule.DataAccess
             return DT;
         }
 
-        public static DataTable GetStudentScheduleForAllWeeks(string specialtyName)
+        public static DataTable GetStudentScheduleForAllWeeks(string specialtyName, int course)
         {
-            string query = Queries.StudentScheduleForAllWeeksQuery(specialtyName);
+            string query = Queries.StudentScheduleForAllWeeksQuery(specialtyName, course);
 
             DataTable DT = Access2Dt(query);
 
@@ -90,9 +90,9 @@ namespace MYSchedule.DataAccess
             return DT;
         }
 
-        public static DataTable GetStudentScheduleForSelectedWeek(string specialty, int week)
+        public static DataTable GetStudentScheduleForSelectedWeek(string specialty, int week, int course)
         {
-            string query = Queries.StudentScheduleForSelectedWeekQuery(specialty, week);
+            string query = Queries.StudentScheduleForSelectedWeekQuery(specialty, week, course);
 
             DataTable DT = Access2Dt(query);
 

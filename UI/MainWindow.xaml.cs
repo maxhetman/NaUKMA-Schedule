@@ -107,6 +107,7 @@ namespace UI
             showComputerClassrooms.IsChecked = false;
             buildings.SelectedIndex = -1;
             showAllClassroms.IsChecked = false;
+            mquery1Weeks.SelectedIndex = 0;
         }
 
         private void OnBuildingsSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -404,16 +405,20 @@ namespace UI
         {
             var specialty = studentSpecialtySelect.Text;
             var weekNumberStr = studentWeekSelect.Text;
-
-            return string.Format("{0}, {1}", specialty, weekNumberStr);
+            int yearOfStudying = int.Parse(studentCourseSelect.Text);
+            return string.Format("{0}, {1}, {2} курс", specialty, weekNumberStr, yearOfStudying);
         }
 
         private DataTable GetStudentSchedule()
         {
             var weekNumberStr = studentWeekSelect.Text;
             var specialty = studentSpecialtySelect.Text;
+            int? yearOfStudying = string.IsNullOrEmpty(studentCourseSelect.Text)
+                ? (int?)null
+                : int.Parse(studentCourseSelect.Text);
 
-            if (string.IsNullOrEmpty(weekNumberStr) || string.IsNullOrEmpty(specialty))
+            if (string.IsNullOrEmpty(weekNumberStr) || string.IsNullOrEmpty(specialty)
+                || yearOfStudying == null)
             {
                 ShowPopup("Виберіть всі параметри");
                 return null;
@@ -423,10 +428,10 @@ namespace UI
 
             if (weekNumberStr == "Всі тижні")
             {
-                return QueryManager.GetStudentScheduleForAllWeeks(specialty);
+                return QueryManager.GetStudentScheduleForAllWeeks(specialty, (int) yearOfStudying);
             }
             var weekNumber = int.Parse(weekNumberStr.Substring(0, weekNumberStr.IndexOf(" ")));
-            return QueryManager.GetStudentScheduleForSelectedWeek(specialty, weekNumber);
+            return QueryManager.GetStudentScheduleForSelectedWeek(specialty, weekNumber, (int) yearOfStudying);
         }
 
         #endregion
@@ -467,6 +472,7 @@ namespace UI
             studentWeekSelect.ItemsSource = selectWeeks;
             studentWeekSelect.SelectedIndex = 0;
             studentSpecialtySelect.ItemsSource = allSpecialties;
+            studentCourseSelect.ItemsSource = allYears;
         }
 
         private void OnExportBtnClick(object sender, RoutedEventArgs e)

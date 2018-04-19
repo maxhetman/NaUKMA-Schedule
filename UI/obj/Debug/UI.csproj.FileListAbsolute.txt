@@ -36,3 +36,17 @@ C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.csproj.Ge
 C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.csproj.CoreCompileInputs.cache
 C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.exe
 C:\Users\Roman\source\repos\MYSchedule\NaUKMA-Schedule\UI\obj\Debug\UI.pdb
+E:\MYSchedule\MYSchedule\bin\Debug\UI.exe.config
+E:\MYSchedule\MYSchedule\bin\Debug\UI.exe
+E:\MYSchedule\MYSchedule\bin\Debug\UI.pdb
+E:\MYSchedule\UI\obj\Debug\UI.csprojResolveAssemblyReference.cache
+E:\MYSchedule\UI\obj\Debug\MainWindow.g.cs
+E:\MYSchedule\UI\obj\Debug\App.g.cs
+E:\MYSchedule\UI\obj\Debug\UI_MarkupCompile.cache
+E:\MYSchedule\UI\obj\Debug\UI_MarkupCompile.lref
+E:\MYSchedule\UI\obj\Debug\MainWindow.baml
+E:\MYSchedule\UI\obj\Debug\UI.g.resources
+E:\MYSchedule\UI\obj\Debug\UI.Properties.Resources.resources
+E:\MYSchedule\UI\obj\Debug\UI.csproj.GenerateResource.Cache
+E:\MYSchedule\UI\obj\Debug\UI.exe
+E:\MYSchedule\UI\obj\Debug\UI.pdb

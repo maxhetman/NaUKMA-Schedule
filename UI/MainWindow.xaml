@@ -130,7 +130,7 @@
                         </Grid>
 
                     </ContentControl>
-                    <ContentControl Name="studentScheduleParams" HorizontalAlignment="Left" Margin="13,10,0,0" VerticalAlignment="Top" Height="57" Width="557" Visibility="Collapsed" Grid.ColumnSpan="2">
+                    <ContentControl Name="studentScheduleParams" HorizontalAlignment="Left" Margin="13,10,0,0" VerticalAlignment="Top" Height="57" Width="557" Grid.ColumnSpan="2" Visibility="Collapsed">
                         <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="557">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="135*"/>
@@ -142,6 +142,8 @@
                             <Label x:Name="label14" Content="Вибрати тиждень" HorizontalAlignment="Left" Margin="19,0,0,0" VerticalAlignment="Top" Height="25" Width="134" Grid.Column="1" Grid.ColumnSpan="2"/>
                             <ComboBox x:Name="studentSpecialtySelect" HorizontalAlignment="Left" Margin="21,25,0,0" VerticalAlignment="Top" Width="97" Height="22" Grid.Column="2"/>
                             <Label x:Name="label15" Content="Спеціальність" HorizontalAlignment="Left" Margin="21,0,0,0" VerticalAlignment="Top" Height="25" Width="106" Grid.Column="2"/>
+                            <Label x:Name="label16" Content="Курс" Grid.Column="2" HorizontalAlignment="Left" Margin="132,0,0,0" VerticalAlignment="Top" Height="25" Width="79"/>
+                            <ComboBox x:Name="studentCourseSelect" Grid.Column="2" HorizontalAlignment="Left" Margin="132,25,0,0" VerticalAlignment="Top" Width="79"/>
 
                         </Grid>
 

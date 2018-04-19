@@ -78,9 +78,9 @@ namespace MYSchedule.Parser
 
                 var weeksString = row[5].Value.ToString();
 
-                if (string.IsNullOrEmpty(teacher.ToString()))
+                if (string.IsNullOrEmpty(teacher.LastName))
                 {
-                    teacher = new TeacherDto {LastName = "Вакансія"}; // in case of null
+                    teacher.LastName = "Вакансія"; // in case of null
                 }
                     
 

@@ -45,10 +45,10 @@
             return query;
         }
 
-        public static string StudentScheduleForAllWeeksQuery(string specialtyName)
+        public static string StudentScheduleForAllWeeksQuery(string specialtyName, int course)
         {
             var query = studentScheduleForAllWeeks;
-            query += "WHERE SP.Name = \"" + specialtyName + "\"" + OrderByDayLessonSubject;
+            query += "WHERE SP.Name = \"" + specialtyName + "\" AND YearOfStudying = " + course + OrderByDayLessonSubject;
             return query;
         }
 
@@ -60,10 +60,10 @@
         }
 
 
-        public static string StudentScheduleForSelectedWeekQuery(string specialtyName, int weekNumber)
+        public static string StudentScheduleForSelectedWeekQuery(string specialtyName, int weekNumber, int course)
         {
             var query = studentScheduleForSelectedWeek;
-            query += "WHERE WS.WeekNumber = " + weekNumber + " AND SP.Name = \"" + specialtyName + "\"";
+            query += "WHERE WS.WeekNumber = " + weekNumber + " AND YearOfStudying = " + course + " AND SP.Name = \"" + specialtyName + "\"";
             return query;
         }
 
