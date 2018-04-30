@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MYSchedule.Utils;
 
 namespace MYSchedule.DTO
@@ -7,6 +8,20 @@ namespace MYSchedule.DTO
     {
         public int DayNumber; //0-6
         public string DayName; //Monday-Sunday
+        public static Dictionary<int, string> DayNameByNumber;
+
+        static DayDto()
+        {
+            DayNameByNumber = new Dictionary<int, string>()
+            {
+                {1, Constants.Monday},
+                {2, Constants.Tuesday},
+                {3, Constants.Wednesday},
+                {4, Constants.Thursday},
+                {5, Constants.Friday},
+                {6, Constants.Saturday}
+            };
+        }
 
         public static int GetNumberByName(string name)
         {

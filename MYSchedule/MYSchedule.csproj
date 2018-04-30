@@ -86,6 +86,7 @@
     <Compile Include="ExcelExport\ExcelExportLessonByCourseAndSpecialty.cs" />
     <Compile Include="ExcelExport\ExcelExportManager.cs" />
     <Compile Include="ExcelExport\GenericExcelExport.cs" />
+    <Compile Include="Exceptions\InvalidInputException.cs" />
     <Compile Include="ScheduleTest.cs" />
     <Compile Include="Parser\ExcelParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

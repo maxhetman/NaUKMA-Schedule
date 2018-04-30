@@ -14,7 +14,7 @@ namespace MYSchedule.DTO
 
         public string Subject;
         public LessonTypeDto LessonType; //FK LessonTypeDto
-        public int? Group; //null if lecture 
+        public string Group; //null if lecture 
 
         public DayDto Day;
         public SpecialtyDto Specialty;
@@ -54,7 +54,7 @@ namespace MYSchedule.DTO
                 hashCode = (hashCode * 397) ^ (LessonTime != null ? LessonTime.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (Subject != null ? Subject.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (LessonType != null ? LessonType.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ Group.GetHashCode();
+                hashCode = (hashCode * 397) ^ (Group != null ? Group.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (Day != null ? Day.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (Specialty != null ? Specialty.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (ClassRoom != null ? ClassRoom.GetHashCode() : 0);

@@ -138,8 +138,15 @@ namespace MYSchedule.ExcelExport
             }
 
             var prevName = worksheet.Cells[cellIndex.x, cellIndex.y].Text.ToString();
-            worksheet.Cells[cellIndex.x, cellIndex.y] = prevName + "/\n" + teacherName;
-            worksheet.Cells[cellIndex.x, cellIndex.y + 1] = prevWeeks + "/\n" + weeks;
+            if (prevName != teacherName)
+            {
+                worksheet.Cells[cellIndex.x, cellIndex.y] = prevName + "/\n" + teacherName;
+                worksheet.Cells[cellIndex.x, cellIndex.y + 1] = prevWeeks + "/\n" + weeks;
+            }
+            else
+            {
+                worksheet.Cells[cellIndex.x, cellIndex.y + 1] = prevWeeks + ", " + weeks;
+            }
 
             List<int> prevWeeksList = Utils.Utils.ParseWeeks(prevWeeks);
             List<int> currWeeksList = Utils.Utils.ParseWeeks(weeks);

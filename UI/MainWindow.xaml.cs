@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.OleDb;
 using System.Windows;
 using System.Windows.Controls;
 using MYSchedule.DataAccess;
 using MYSchedule.DTO;
 using MYSchedule.ExcelExport;
+using MYSchedule.Exceptions;
 using MYSchedule.Parser;
 using MYSchedule.Utils;
 
@@ -89,16 +91,14 @@ namespace UI
 
         private void CheckTeacherConsistensy(object sender, RoutedEventArgs e)
         {
-            mQueries.SelectedIndex = -1;
-            var inconsistentData = DBAccessManager.GetInconsistentTeachers();
-            SetDataView("Перевірка вчителів на несуперечливість", inconsistentData);
+            methoditsParamsQuery1.Visibility = Visibility.Collapsed;
+            methoditsParamsQuery2.Visibility = Visibility.Collapsed;
         }
 
         private void CheckClassRoomConsistensy(object sender, RoutedEventArgs e)
         {
-            mQueries.SelectedIndex = -1;
-            var inconsistentData = DBAccessManager.GetInconsistentClassrooms();
-            SetDataView("Перевірка аудиторій на несуперечливість", inconsistentData);
+            methoditsParamsQuery1.Visibility = Visibility.Collapsed;
+            methoditsParamsQuery2.Visibility = Visibility.Collapsed;
         }
 
         private void OnMQuery1Reset(object sender, RoutedEventArgs e)
@@ -283,6 +283,7 @@ namespace UI
                 return string.Format("Зайнятість аудиторії {0}", classRoomNumber);
             }
 
+
             var classroomType = isComputer == null ? " " : " комп`ютерних ";
             var header = string.Format("Зайнятість{0}аудиторій ", classroomType);
 
@@ -290,6 +291,10 @@ namespace UI
             {
                 header += string.Format("{0} корпусу ", building);
             }
+
+            var weekNumberStr = mquery1Weeks.Text;
+
+            header += "на " + weekNumberStr;
 
             return header;
         }
@@ -520,9 +525,9 @@ namespace UI
         private void OnSearchBtnClick(object sender, RoutedEventArgs e)
         {
             var header = string.Empty;
-
+            
             if (methodistTab.IsSelected)
-            {
+            {                
                 if (mquery1.IsSelected)
                 {
                     var dataTable = GetAvailableClassRooms();
@@ -557,6 +562,14 @@ namespace UI
 
                     }
                     SetDataView(header, dataTable);
+                } else if (classroomConsistensy.IsSelected)
+                {
+                    var inconsistentData = DBAccessManager.GetInconsistentClassrooms();
+                    SetDataView("Перевірка аудиторій на несуперечливість", inconsistentData);
+                } else if (teacherConsistensy.IsSelected)
+                {
+                    var inconsistentData = DBAccessManager.GetInconsistentTeachers();
+                    SetDataView("Перевірка вчителів на несуперечливість", inconsistentData);
                 }
             }
             else if (teacherTab.IsSelected)
@@ -650,28 +663,34 @@ namespace UI
         private void ImportExcelWorkerDoWork(object sender, DoWorkEventArgs e)
         {
             // run all background tasks here
-
-            foreach (var name in fileNames)
+            try
             {
-                var schedule = ExcelParser.GetScheduleFromExcel(name);
-                foreach (KeyValuePair<ScheduleRecordDto, List<int>> entry in schedule)
+                foreach (var name in fileNames)
                 {
-                    bool isAdded = ScheduleRecordDao.AddIfNotExists(entry.Key);
-
-                    if (!isAdded)
+                    var schedule = ExcelParser.GetScheduleFromExcel(name);
+                    foreach (KeyValuePair<ScheduleRecordDto, List<int>> entry in schedule)
                     {
-                        continue;
-                    }
+                        bool isAdded = ScheduleRecordDao.AddIfNotExists(entry.Key);
 
-                    foreach (var weekNumber in entry.Value)
-                    {
-                        //TSR
-                        if (weekNumber == 8)
+                        if (!isAdded)
+                        {
                             continue;
+                        }
 
-                        WeekScheduleDao.AddWeekSchedule(weekNumber: weekNumber, scheduleRecordId: entry.Key.Id);
+                        foreach (var weekNumber in entry.Value)
+                        {
+                            //TSR
+                            if (weekNumber == 8)
+                                continue;
+
+                            WeekScheduleDao.AddWeekSchedule(weekNumber: weekNumber, scheduleRecordId: entry.Key.Id);
+                        }
                     }
                 }
+            }
+            catch (InvalidInputException ex)
+            {
+                ShowPopup(ex.Message);
             }
         }
 
@@ -734,6 +753,7 @@ namespace UI
                 DBAccessManager.ClearDataBase();
                 ShowPopup("Дані видалено");
                 FillDropDownsInfo();
+                SetDataView("", new DataTable());
             }
         }
 

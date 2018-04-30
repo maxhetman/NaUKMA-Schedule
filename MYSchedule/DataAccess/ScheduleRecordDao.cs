@@ -23,6 +23,7 @@ namespace MYSchedule.DataAccess
 
             var specialtyId = SpecialtyDao.AddIfNotExists(scheduleRecord.Specialty);
             var teacherId = TeacherDao.AddIfNotExists(scheduleRecord.Teacher);
+            ClassRoomsDao.AddIfNotExists(scheduleRecord.ClassRoom);
             scheduleRecord.Id = scheduleRecord.GetHashCode();
 
             if (IsStoredInDb(scheduleRecord.Id))
@@ -43,7 +44,7 @@ namespace MYSchedule.DataAccess
                     oleDbCommand.Parameters.AddWithValue("@YearOfStudying", scheduleRecord.YearOfStudying);
                     oleDbCommand.Parameters.AddWithValue("@Subject", scheduleRecord.Subject);
                     oleDbCommand.Parameters.AddWithValue("@LessonTypeId", scheduleRecord.LessonType.Id);
-                    if (scheduleRecord.Group == null)
+                    if (scheduleRecord.Group == string.Empty)
                     {
                         oleDbCommand.Parameters.AddWithValue("@Group", DBNull.Value);
                     }

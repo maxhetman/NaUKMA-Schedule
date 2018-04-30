@@ -8,6 +8,8 @@ namespace MYSchedule.DataAccess
         private const string clearWeekScheduleQuery = "Delete * From WeekSchedule";
         private const string clearScheduleRecordQuery = "Delete * From ScheduleRecord";
         private const string clearTeacherQuery = "Delete * From Teacher";
+        private const string clearSpecialtyQuery = "Delete * From Specialty";
+
         private const string classRoomInconsistenseQuery = "SELECT DayName, LessonTimePeriod, ClassRoomNumber, WS.WeekNumber AS [Week] FROM((ScheduleRecord AS S INNER JOIN [Day] AS D ON S.DayNumber = D.DayNumber) INNER JOIN LessonTime AS L ON S.LessonTimeNumber = L.Number) INNER JOIN WeekSchedule AS WS ON S.Id = WS.ScheduleRecordId GROUP BY DayName, LessonTimePeriod, ClassRoomNumber, WS.WeekNumber HAVING COUNT(*)>1; ";
 
         private const string teacherInconsistenseQuery =
@@ -19,6 +21,7 @@ namespace MYSchedule.DataAccess
             ClearTable(clearWeekScheduleQuery);
             ClearTable(clearScheduleRecordQuery);
             ClearTable(clearTeacherQuery);
+            ClearTable(clearSpecialtyQuery);
         }
 
         public static DataTable GetInconsistentClassrooms()

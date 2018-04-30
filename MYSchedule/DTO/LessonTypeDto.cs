@@ -29,7 +29,7 @@ namespace MYSchedule.DTO
 
     public enum LessonType
     {
-        Lecture = 1,
-        Practice = 2
+        Лекція = 1,
+        Практика = 2
     }
 }

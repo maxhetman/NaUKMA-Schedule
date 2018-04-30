@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using LinqToExcel;
 using MYSchedule.DTO;
+using MYSchedule.Exceptions;
 using MYSchedule.Utils;
 using Remotion.Mixins.CodeGeneration.DynamicProxy.TypeGeneration;
 
@@ -17,12 +18,13 @@ namespace MYSchedule.Parser
         private static SpecialtyDto _specialty;
         private static int _yearOfStudying;
         private static Row[] _rows;
-
+        private static string _currentFilePath;
         private static Dictionary<ScheduleRecordDto, List<int>> _weekScheduleRecords =
             new Dictionary<ScheduleRecordDto, List<int>>();
 
         public static Dictionary<ScheduleRecordDto, List<int>> GetScheduleFromExcel(string filePath)
         {
+            _currentFilePath = filePath;
             var excel = new ExcelQueryFactory(filePath);
     
 
@@ -47,13 +49,19 @@ namespace MYSchedule.Parser
             {
                 var nextDay = _rows[i][0].Value.ToString();
 
+
+                var nextTime = _rows[i][1].Value.ToString();
+
                 if (!string.IsNullOrEmpty(nextDay))
                 {
                     currentDay = nextDay;
-                    currentDayDto = new DayDto {DayNumber = DayDto.GetNumberByName(currentDay)};
+                    currentDayDto = new DayDto { DayNumber = DayDto.GetNumberByName(currentDay), DayName = currentDay};
+                } else if (LessonTimeDto.GetNumberFromPeriod(nextTime) == 1)
+                {
+                    var curDayIndex = DayDto.GetNumberByName(currentDay);
+                    currentDay = DayDto.DayNameByNumber[curDayIndex+1];
+                    currentDayDto = new DayDto { DayNumber = curDayIndex + 1, DayName = currentDay};
                 }
-
-                var nextTime = _rows[i][1].Value.ToString();
 
                 if (!string.IsNullOrEmpty(nextTime))
                 {
@@ -68,13 +76,14 @@ namespace MYSchedule.Parser
             
         }
 
+
         private static void AppendNewScheduleRecord(DayDto dayDto, string time, Row row)
         {
             try
             {
                 string subject = row[2].Value.ToString();
                 TeacherDto teacher = GetTeacherData(row[3].Value.ToString());
-                ClassRoomDto classRoom = new ClassRoomDto { Number = row[6].Value.ToString().Replace(" ", String.Empty) };
+                ClassRoomDto classRoom = new ClassRoomDto {Number = row[6].Value.ToString().Replace(" ", String.Empty)};
 
                 var weeksString = row[5].Value.ToString();
 
@@ -82,20 +91,33 @@ namespace MYSchedule.Parser
                 {
                     teacher.LastName = "Вакансія"; // in case of null
                 }
-                    
 
-                if (string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(classRoom.Number)
-                    || string.IsNullOrEmpty(weeksString))
+
+                var groupStr = row[4].Value.ToString(); //either number or 'lecture'           
+
+                if (string.IsNullOrEmpty(subject) || subject.Length<=2)
                     return;
 
-                LessonTimeDto lessonTime = new LessonTimeDto {Number = LessonTimeDto.GetNumberFromPeriod(time)};
+                if (string.IsNullOrEmpty(classRoom.Number)
+                    || string.IsNullOrEmpty(weeksString) || string.IsNullOrEmpty(groupStr))
+                {
+                    throw new InvalidInputException("Некоректні дані: " + dayDto.DayName + ", " + time + " у файлі " + _currentFilePath);
+                }
 
-                int groupCheck;
-                int.TryParse(row[4].Value.ToString(), out groupCheck);
-                int? group = groupCheck > 0 ? (int?) groupCheck : null; //group == null if lesson type is lecture
-                
+                LessonTimeDto lessonTime = new LessonTimeDto {Number = LessonTimeDto.GetNumberFromPeriod(time)};
+                string group = string.Empty;
+
+                if (groupStr.Any(char.IsDigit))
+                {
+                    group = groupStr.Replace(" ", "");
+                }
+                else
+                {
+                    group = string.Empty;
+                }
+
                 LessonTypeDto lessonType = new LessonTypeDto();
-                lessonType.Id = LessonTypeDto.GetIdByType(group == null ? LessonType.Lecture : LessonType.Practice);
+                lessonType.Id = LessonTypeDto.GetIdByType(group == string.Empty ? LessonType.Лекція : LessonType.Практика);
 
                 ScheduleRecordDto scheduleRecord = new ScheduleRecordDto
                 {
@@ -116,17 +138,19 @@ namespace MYSchedule.Parser
                 _weekScheduleRecords.Add(scheduleRecord, new List<int>());
                 foreach (var weekNumber in weeksList)
                 {
-                   _weekScheduleRecords[scheduleRecord].Add(weekNumber);
+                    _weekScheduleRecords[scheduleRecord].Add(weekNumber);
                 }
 
             }
-
+            catch (InvalidInputException e)
+            {
+                Logger.LogException(e);
+                throw e;
+            }
             catch (Exception e)
             {
                 Logger.LogException(e);
             }
-
-
         }
 
         private static void SetSpecialtyNameAndYearOfStudying(String columnValue)
@@ -136,6 +160,8 @@ namespace MYSchedule.Parser
                 var comaIndex = columnValue.IndexOf(",");
                 var specialtyName = columnValue.Substring(0, comaIndex);
 
+                specialtyName = specialtyName.Replace("\"", "").Trim();
+   
                 _specialty = new SpecialtyDto {Name = specialtyName};
 
                 _yearOfStudying = Convert.ToInt32(Regex.Match(columnValue.Substring(comaIndex), @"\d+").Value);
