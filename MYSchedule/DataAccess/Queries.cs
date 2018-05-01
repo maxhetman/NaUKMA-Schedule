@@ -4,6 +4,10 @@
     {
         private const string classroomsAvailabilityForAllWeeks = @"Select D.DayName AS День, L.LessonTimePeriod AS Пара, S.ClassRoomNumber AS Аудиторія, T.LastName, T.Initials, S.Weeks AS Тижні From ((((ScheduleRecord S Inner Join [Day] D ON S.DayNumber = D.DayNumber) Inner Join Teacher T ON S.TeacherId = T.Id) Inner Join ClassRoom C ON S.ClassRoomNumber = C.Number) Inner Join LessonTime L ON S.LessonTimeNumber = L.Number) ";
 
+        private const string classroomsAvailabilityForAllWeeks2 = @"SELECT dayLessonClassRoom.DayName AS День, dayLessonClassRoom.LessonTimePeriod AS Пара, dayLessonClassRoom.ClassRoomNumber AS Аудиторія, Teacher.LastName AS Прізвище, Teacher.Initials AS Ініціали, ScheduleRecord.Weeks AS Тижні FROM ( SELECT ClassRoom.Number AS ClassRoomNumber, ClassRoom.Building, Day.DayNumber, Day.DayName, LessonTime.Number AS LessonTimeNumber, LessonTime.LessonTimePeriod FROM ClassRoom, [Day], LessonTime) AS dayLessonClassRoom LEFT JOIN (ScheduleRecord LEFT JOIN Teacher ON ScheduleRecord.TeacherId = Teacher.Id) ON (dayLessonClassRoom.DayNumber = ScheduleRecord.DayNumber) AND (dayLessonClassRoom.LessonTimeNumber = ScheduleRecord.LessonTimeNumber) AND (dayLessonClassRoom.ClassRoomNumber = ScheduleRecord.ClassRoomNumber) ";
+
+        private const string classroomsAvailabilityForSelectedWeek2 = @"SELECT dayLessonClassRoom.DayName AS День, dayLessonClassRoom.LessonTimePeriod AS Пара, dayLessonClassRoom.ClassRoomNumber AS Аудиторія, Teacher.LastName AS Прізвище, Teacher.Initials AS Ініціали, WS.WeekNumber AS Тиждень FROM ( SELECT ClassRoom.Number AS ClassRoomNumber, ClassRoom.Building, Day.DayNumber, Day.DayName, LessonTime.Number AS LessonTimeNumber, LessonTime.LessonTimePeriod FROM ClassRoom, [Day], LessonTime) AS dayLessonClassRoom LEFT JOIN ((ScheduleRecord LEFT JOIN Teacher ON ScheduleRecord.TeacherId = Teacher.Id) LEFT JOIN WeekSchedule WS ON ScheduleRecord.Id = WS.ScheduleRecordID) ON (dayLessonClassRoom.DayNumber = ScheduleRecord.DayNumber) AND (dayLessonClassRoom.LessonTimeNumber = ScheduleRecord.LessonTimeNumber) AND (dayLessonClassRoom.ClassRoomNumber = ScheduleRecord.ClassRoomNumber) ";
+
         private const string classroomsAvailabilityForSelectedWeek = @"Select D.DayName AS День, L.LessonTimePeriod AS Пара, S.ClassRoomNumber AS Аудиторія, T.LastName, T.Initials, WS.WeekNumber AS Тиждень From (((((ScheduleRecord S Inner Join [Day] D ON S.DayNumber = D.DayNumber) Inner Join Teacher T ON S.TeacherId = T.Id) Inner Join ClassRoom C ON S.ClassRoomNumber = C.Number) Inner Join LessonTime L ON S.LessonTimeNumber = L.Number) Inner Join WeekSchedule WS ON S.Id = WS.ScheduleRecordId) ";
 
         private const string OrderByLessonTimeClassRoom = " ORDER BY D.DayNumber, L.Number, C.Number";
@@ -59,7 +63,9 @@
              return query;
         }
 
-
+        public static string OrderByMethodistFirstQuery =
+                " ORDER BY dayLessonClassRoom.DayNumber, dayLessonClassRoom.LessonTimeNumber, dayLessonClassRoom.Building, dayLessonClassRoom.ClassRoomNumber"
+            ;
         public static string StudentScheduleForSelectedWeekQuery(string specialtyName, int weekNumber, int course)
         {
             var query = studentScheduleForSelectedWeek;
@@ -81,50 +87,50 @@
         public static string ClassRoomsAvailabilityForAllWeeksQuery(int? buildingNumber, bool? isComputer,
             string classroomNumber)
         {
-            var query = classroomsAvailabilityForAllWeeks;
+            var query = classroomsAvailabilityForAllWeeks2;
 
             if (buildingNumber != null)
             {
-                query += "Where Building = " + buildingNumber;
+                query += "Where dayLessonClassRoom.Building = " + buildingNumber;
             }
 
             if (isComputer != null)
             {
                 query += buildingNumber == null
-                    ? "Where IsComputerClass = " + isComputer
-                    : " And IsComputerClass = " + isComputer;
+                    ? "Where dayLessonClassRoom.IsComputerClass = " + isComputer
+                    : " And dayLessonClassRoom.IsComputerClass = " + isComputer;
             }
 
             if (classroomNumber != null)
             {
-                query += "Where C.Number = \"" + classroomNumber + "\"";
+                query += "Where dayLessonClassRoom.ClassRoomNumber = \"" + classroomNumber + "\"";
             }
 
-            query += OrderByLessonTimeClassRoom;
+            query += OrderByMethodistFirstQuery;
             return query;
         }
 
         public static string ClassRoomsAvailabilityForSelectedWeekQuery(int? buildingNumber, bool? isComputer,
             string classroomNumber, int week)
         {
-            var query = classroomsAvailabilityForSelectedWeek;
+            var query = classroomsAvailabilityForSelectedWeek2;
             var filterPartOfQuery = string.Empty;
 
             if (buildingNumber != null)
             {
-                filterPartOfQuery += "Where Building = " + buildingNumber;
+                filterPartOfQuery += "Where dayLessonClassRoom.Building = " + buildingNumber;
             }
 
             if (isComputer != null)
             {
                 filterPartOfQuery += buildingNumber == null
-                    ? "Where IsComputerClass = " + isComputer
-                    : " And IsComputerClass = " + isComputer;
+                    ? "Where dayLessonClassRoom.IsComputerClass = " + isComputer
+                    : " And dayLessonClassRoom.IsComputerClass = " + isComputer;
             }
 
             if (classroomNumber != null)
             {
-                filterPartOfQuery += "Where C.Number = \"" + classroomNumber + "\"";
+                filterPartOfQuery += "Where dayLessonClassRoom.ClassRoomNumber = \"" + classroomNumber + "\"";
             }
 
             filterPartOfQuery = filterPartOfQuery == string.Empty
@@ -132,7 +138,7 @@
                 : " And WS.WeekNumber = " + week;
 
             query += filterPartOfQuery;
-            query += OrderByLessonTimeClassRoom;
+            query += OrderByMethodistFirstQuery;
             return query;
         }
     }
