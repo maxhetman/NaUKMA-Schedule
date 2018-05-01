@@ -53,10 +53,6 @@ namespace MYSchedule.DTO
                     }
             }           
         }
-        public override string ToString()
-        {
-            return $"{nameof(DayNumber)}: {DayNumber}, {nameof(DayName)}: {DayName}";
-        }
 
         public override int GetHashCode()
         {

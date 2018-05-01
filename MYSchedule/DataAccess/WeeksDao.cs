@@ -40,9 +40,9 @@ namespace MYSchedule.DataAccess
 
         private static string GetFormattedWeeks(DataRow week)
         {
-            var start = Convert.ToDateTime(week[1]).Date;
-            var endDate = Convert.ToDateTime(week[2]).Date;
-            return string.Format("{0} т. {1}.{2} - {3}.{4}", week[0], start.Day.ToString("00"), start.Month.ToString("00"), endDate.Day.ToString("00"), endDate.Month.ToString("00"));
+            var start = week[1];
+            var endDate = week[2];
+            return string.Format("{0} т. {1} - {2}", week[0], start, endDate);
         }
 
         public static void SetFirstWeekDate(DateTime selectedDate)

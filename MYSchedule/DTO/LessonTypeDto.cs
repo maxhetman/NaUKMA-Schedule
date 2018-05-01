@@ -15,11 +15,6 @@ namespace MYSchedule.DTO
             return (int) type;
         }
 
-        public override string ToString()
-        {
-            return $"{nameof(Id)}: {Id}, {nameof(Type)}: {Type}";
-        }
-   
         public override int GetHashCode()
         {
             return (Type != null ? Type.GetHashCode() : 0);

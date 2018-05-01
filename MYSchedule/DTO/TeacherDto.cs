@@ -7,11 +7,6 @@
         public string Initials;
         public string Position;
 
-        public override string ToString()
-        {
-            return $"{nameof(Id)}: {Id}, {nameof(LastName)}: {LastName}, {nameof(Initials)}: {Initials}, {nameof(Position)}: {Position}";
-        }
-
         public override int GetHashCode()
         {
             unchecked

@@ -14,11 +14,6 @@ namespace MYSchedule.DTO
         public bool IsComputerClass;
         public int Building; //depends on Number (1, 3)
 
-        public override string ToString()
-        {
-            return $"{nameof(Number)}: {Number}";
-        }
-
         public override int GetHashCode()
         {
             return (Number != null ? Number.GetHashCode() : 0);

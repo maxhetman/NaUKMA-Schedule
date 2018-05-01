@@ -21,16 +21,6 @@ namespace MYSchedule.DTO
         public TeacherDto Teacher;
         public string Weeks;
 
-        public override string ToString()
-        {
-            return
-                $"{nameof(Id)}: {Id}," +
-                $" {nameof(YearOfStudying)}: {YearOfStudying}, {nameof(LessonTime)}: {LessonTime}, " +
-                $"{nameof(Subject)}: {Subject}, {nameof(LessonType)}: {LessonType}, {nameof(Group)}: {Group}," +
-                $" {nameof(Day)}: {Day}, {nameof(Specialty)}: {Specialty}, {nameof(ClassRoom)}: {ClassRoom}," +
-                $" {nameof(Teacher)}: {Teacher}, {nameof(Weeks)}: {Weeks}";
-        }
-
         protected bool Equals(ScheduleRecordDto other)
         {
             return Id == other.Id && YearOfStudying == other.YearOfStudying && Equals(LessonTime, other.LessonTime) && string.Equals(Subject, other.Subject) && Equals(LessonType, other.LessonType) && Group == other.Group && Equals(Day, other.Day) && Equals(Specialty, other.Specialty) && Equals(ClassRoom, other.ClassRoom) && Equals(Teacher, other.Teacher);
