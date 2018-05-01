@@ -38,7 +38,7 @@ namespace MYSchedule.ExcelExport
         {
 
             var columnsCount = dataTable.Columns.Count;
-            var rowsCount = dataTable.Rows.Count;
+            var rowsCount = dataTable.Rows.Count+2;
 
             worksheet.Cells[1, 1].Font.Size = 15;
             worksheet.Cells[1, 1].Font.Bold = true;
@@ -56,11 +56,11 @@ namespace MYSchedule.ExcelExport
             //vertical lines
             for (int i = 1; i <= columnsCount; i++)
             {               
-                worksheet.Range[worksheet.Cells[1, i], worksheet.Cells[rowsCount + 1, i]].Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
+                worksheet.Range[worksheet.Cells[1, i], worksheet.Cells[rowsCount, i]].Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
             }
 
             //horizontal lines
-            for (int i = 1; i <= rowsCount + 1; i++)
+            for (int i = 1; i <= rowsCount; i++)
             {
                 worksheet.Range[worksheet.Cells[i, 1], worksheet.Cells[i, columnsCount]].Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
             }
@@ -73,11 +73,16 @@ namespace MYSchedule.ExcelExport
         {
             worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, columnNames.Length]].Merge();
             worksheet.Cells[1, 1] = header;
+            worksheet.Range[worksheet.Cells[1, 1],
+                worksheet.Cells[1, 1]].Interior.Color = XlRgbColor.rgbBeige;
 
-            for (int i = 0; i < columnNames.Length; i++)
+            int i=0;
+            for ( i = 0; i < columnNames.Length; i++)
             {
                 worksheet.Cells[2, i+1] = columnNames[i];
             }
+            worksheet.Range[worksheet.Cells[2, 1],
+                worksheet.Cells[2, i]].Interior.Color = XlRgbColor.rgbAntiqueWhite;
         }
 
         private static void FillData(Worksheet worksheet, DataTable dataTable)

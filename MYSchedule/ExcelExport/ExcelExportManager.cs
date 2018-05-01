@@ -267,6 +267,9 @@ namespace MYSchedule.ExcelExport
             worksheet.Cells[2, 12] = Constants.Friday;
             worksheet.Cells[2, 14] = Constants.Saturday;
 
+            worksheet.Range[worksheet.Cells[2, 4],
+                worksheet.Cells[3, 15]].Interior.Color = XlRgbColor.rgbAntiqueWhite;
+
             for (int i = 4; i <= 14; i += 2)
             {
                 worksheet.Cells[3, i] = "Прізвище";
