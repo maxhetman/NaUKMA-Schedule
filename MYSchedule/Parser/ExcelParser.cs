@@ -133,7 +133,8 @@ namespace MYSchedule.Parser
                     Weeks = weeksString
                 };
 
-                var weeksList = Utils.Utils.ParseWeeks(row[5].Value.ToString());
+                var weeksStr = row[5].Value.ToString().Replace(".", ","); //replace 6.9 to 6,9
+                var weeksList = Utils.Utils.ParseWeeks(weeksStr);
 
                 _weekScheduleRecords.Add(scheduleRecord, new List<int>());
                 foreach (var weekNumber in weeksList)
