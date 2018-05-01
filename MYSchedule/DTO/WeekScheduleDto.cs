@@ -9,6 +9,6 @@ namespace MYSchedule.DTO
     {
         public WeekDto WeekDto; //PPK FK
         public ScheduleRecordDto SheduleRecord; //PPK FK
-`
+
     }
 }
