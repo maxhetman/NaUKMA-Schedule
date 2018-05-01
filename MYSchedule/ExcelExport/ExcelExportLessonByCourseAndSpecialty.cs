@@ -200,10 +200,10 @@ namespace MYSchedule.ExcelExport
             //    worksheet.Rows[i].RowHeight= 20;
             //}
 
-            for (int i = 4; i < lastWeekYIndex; i++)
-            {
-                worksheet.Columns[i].ColumnWidth= 9;
-            }
+            //for (int i = 4; i < lastWeekYIndex; i++)
+            //{
+            //    worksheet.Columns[i].ColumnWidth= 9;
+            //}
 
         }
         #endregion
