@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,6 +23,17 @@ namespace MYSchedule.Utils
             currentRange.Style.NumberFormat = "@";
 
             // worksheet.Range["C1","C50"].Style.Orientation  = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
+        }
+
+        public static string GetFormattedWeek(DataRow week, bool useNewLine)
+        {
+            var start = week[1].ToString().Replace("/", ".");
+            var endDate = week[2].ToString().Replace("/", ".");
+
+            if (useNewLine)
+                return string.Format("{0} т.\n{1} - \n{2}", week[0], start, endDate);
+            else
+                return string.Format("{0} т. {1} - {2}", week[0], start, endDate);
         }
 
         public static List<int> ParseWeeks(string weeks)

@@ -74,8 +74,9 @@ namespace UI
         {
             mquery1.Selected += MethodistQuery1Selected;
             mquery1reset.Click += OnMQuery1Reset;
-            showAllClassroms.Checked += OnShowAllClassroomToggle;
-            showAllClassroms.Unchecked += OnShowAllClassroomToggle;
+            showAllClassroms.Checked += OnShowAllClassroomChecked;
+            showComputerClassrooms.Checked += OnShowComputerClassroomsChecked;
+            showNotComputerClassrooms.Checked += OnShowNotComputerClassroomsChecked;
             classRoomNumbers.SelectionChanged += OnClassRoomNumbersSelectionChanged;
             buildings.SelectionChanged += OnBuildingsSelectionChanged;
             mquery2.Selected += MethodistQuery2Selected;
@@ -85,9 +86,21 @@ namespace UI
             teacherConsistensy.Selected += CheckTeacherConsistensy;
         }
 
-
-
         #region MouseEventsHandlers
+        
+        private void OnShowComputerClassroomsChecked(object sender, RoutedEventArgs e)
+        {
+            classRoomNumbers.SelectedIndex = -1;
+            showAllClassroms.IsChecked = false;
+            showNotComputerClassrooms.IsChecked = false;
+        }
+
+        private void OnShowNotComputerClassroomsChecked(object sender, RoutedEventArgs e)
+        {
+            classRoomNumbers.SelectedIndex = -1;
+            showAllClassroms.IsChecked = false;
+            showComputerClassrooms.IsChecked = false;
+        }
 
         private void CheckTeacherConsistensy(object sender, RoutedEventArgs e)
         {
@@ -120,22 +133,17 @@ namespace UI
         {
             if (classRoomNumbers.SelectedIndex != -1)
             {
+                ResetMethodistComputerSelection();
                 buildings.SelectedIndex = -1;
                 showComputerClassrooms.IsChecked = false;
             }
         }
 
-        private void OnShowAllClassroomToggle(object sender, RoutedEventArgs e)
+        private void OnShowAllClassroomChecked(object sender, RoutedEventArgs e)
         {
-            var isAllClassRoomsChecked = (bool)showAllClassroms.IsChecked;
-            classRoomNumbers.IsEnabled = !isAllClassRoomsChecked;
-            buildings.IsEnabled = !isAllClassRoomsChecked;
-
-            if (isAllClassRoomsChecked)
-            {
-                classRoomNumbers.SelectedIndex = -1;
-                buildings.SelectedIndex = -1;
-            }
+            classRoomNumbers.SelectedIndex = -1;
+            showComputerClassrooms.IsChecked = false;
+            showNotComputerClassrooms.IsChecked = false;
         }
 
         #endregion
@@ -143,6 +151,12 @@ namespace UI
 
         #region Ui Helpers
 
+        private void ResetMethodistComputerSelection()
+        {
+            showComputerClassrooms.IsChecked = false;
+            showNotComputerClassrooms.IsChecked = false;
+            showAllClassroms.IsChecked = false;            
+        }
         private void SetUiState(bool state)
         {
             mainGrid.IsEnabled = state;
@@ -207,7 +221,7 @@ namespace UI
             var isShowAllClassroms = showAllClassroms.IsChecked;
             var weekNumberStr = mquery1Weeks.Text;
 
-            if (isComputer != true)
+            if (isComputer != true && (bool) !showNotComputerClassrooms.IsChecked)
             {
                 isComputer = null;
             }
@@ -728,7 +742,7 @@ namespace UI
             get
             {
                 var itemsSource = (DataView)dataView.ItemsSource;
-                return itemsSource?.ToTable();
+                return itemsSource == null ? null : itemsSource.ToTable();
             }
         }
 

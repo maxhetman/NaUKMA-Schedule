@@ -29,11 +29,11 @@
             ;
 
         private const string studentScheduleForAllWeeks =
-                "SELECT DayName AS День,  LessonTimePeriod AS Пара, ClassRoomNumber AS Аудиторія, T.LastName & \" \" & T.Initials AS Вчитель , Subject AS Предмет, LT.Type AS Тип, Group AS Група, Weeks AS Тижні FROM((((ScheduleRecord AS S INNER JOIN [Day] AS D ON S.DayNumber= D.DayNumber) INNER JOIN LessonTime AS L ON S.LessonTimeNumber=L.Number) INNER JOIN Teacher AS T ON S.TeacherId = T.Id) INNER JOIN LessonType AS LT ON S.LessonTypeId=LT.Id) INNER JOIN Specialty SP ON S.SpecialtyId = SP.Id "
+                "SELECT DayName AS День,  LessonTimePeriod AS Пара, ClassRoomNumber AS Аудиторія, [T.Position] & \" \" & T.LastName & \" \" & T.Initials AS Викладач , Subject AS Предмет, LT.Type AS Тип, Group AS Група, Weeks AS Тижні FROM((((ScheduleRecord AS S INNER JOIN [Day] AS D ON S.DayNumber= D.DayNumber) INNER JOIN LessonTime AS L ON S.LessonTimeNumber=L.Number) INNER JOIN Teacher AS T ON S.TeacherId = T.Id) INNER JOIN LessonType AS LT ON S.LessonTypeId=LT.Id) INNER JOIN Specialty SP ON S.SpecialtyId = SP.Id "
             ;
 
         private const string studentScheduleForSelectedWeek =
-                "SELECT DayName AS День,  LessonTimePeriod AS Пара, ClassRoomNumber AS Аудиторія,T.LastName & \" \" & T.Initials AS Вчитель , Subject AS Предмет, LT.Type AS Тип, Group AS Група FROM(((((ScheduleRecord AS S INNER JOIN [Day] AS D ON S.DayNumber= D.DayNumber) INNER JOIN LessonTime AS L ON S.LessonTimeNumber=L.Number) INNER JOIN Teacher AS T ON S.TeacherId = T.Id) INNER JOIN LessonType AS LT ON S.LessonTypeId=LT.Id) INNER JOIN WeekSchedule WS ON S.Id = WS.ScheduleRecordId) INNER JOIN Specialty SP ON S.SpecialtyId = SP.Id ";
+                "SELECT DayName AS День,  LessonTimePeriod AS Пара, ClassRoomNumber AS Аудиторія, [T.Position] & \" \" & T.LastName & \" \" & T.Initials AS Викладач , Subject AS Предмет, LT.Type AS Тип, Group AS Група FROM(((((ScheduleRecord AS S INNER JOIN [Day] AS D ON S.DayNumber= D.DayNumber) INNER JOIN LessonTime AS L ON S.LessonTimeNumber=L.Number) INNER JOIN Teacher AS T ON S.TeacherId = T.Id) INNER JOIN LessonType AS LT ON S.LessonTypeId=LT.Id) INNER JOIN WeekSchedule WS ON S.Id = WS.ScheduleRecordId) INNER JOIN Specialty SP ON S.SpecialtyId = SP.Id ";
 
         public static string ScheduleForWeekQuery(int weekNumber)
         {
@@ -133,7 +133,7 @@
                 filterPartOfQuery += "Where dayLessonClassRoom.ClassRoomNumber = \"" + classroomNumber + "\"";
             }
 
-            filterPartOfQuery = filterPartOfQuery == string.Empty
+            filterPartOfQuery += filterPartOfQuery == string.Empty
                 ? "Where WS.WeekNumber = " + week
                 : " And WS.WeekNumber = " + week;
 

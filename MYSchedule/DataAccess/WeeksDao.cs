@@ -33,16 +33,9 @@ namespace MYSchedule.DataAccess
             string[] res = new string[weeksDt.Rows.Count];
             for(int i = 0; i < res.Length; i++)
             {
-                res[i] = GetFormattedWeeks(weeksDt.Rows[i]);
+                res[i] = Utils.Utils.GetFormattedWeek(weeksDt.Rows[i], false);
             }
             return res;
-        }
-
-        private static string GetFormattedWeeks(DataRow week)
-        {
-            var start = week[1];
-            var endDate = week[2];
-            return string.Format("{0} т. {1} - {2}", week[0], start, endDate);
         }
 
         public static void SetFirstWeekDate(DateTime selectedDate)

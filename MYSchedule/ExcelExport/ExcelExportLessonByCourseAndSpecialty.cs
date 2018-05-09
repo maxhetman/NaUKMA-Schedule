@@ -50,18 +50,11 @@ namespace MYSchedule.ExcelExport
 
             foreach (DataRow week in weeks.Rows)
             {
-                worksheet.Cells[3, startIndex] = FormattedWeekPeriod(week);
+                worksheet.Cells[3, startIndex] = Utils.Utils.GetFormattedWeek(week, true);
                 WeekNumberCellIndex.Add(week[0].ToString(), new CellIndex(3,startIndex));
                 startIndex++;
             }
             lastWeekYIndex = startIndex;
-        }
-
-        private static string FormattedWeekPeriod(DataRow week)
-        {
-            var start = Convert.ToDateTime(week[1]).Date;
-            var endDate = Convert.ToDateTime(week[2]).Date;
-            return string.Format("{0} т. \n {1}.{2} - {3}.{4}", week[0], start.Day.ToString("00"), start.Month.ToString("00"), endDate.Day.ToString("00"), endDate.Month.ToString("00"));
         }
 
         private static void CreateHeader(string header, Worksheet worksheet)

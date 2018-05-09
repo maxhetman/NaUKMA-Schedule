@@ -1,0 +1,13 @@
+E:\MYSchedule\MYSchedule\bin\Release\MYSchedule.exe.config
+E:\MYSchedule\MYSchedule\bin\Release\MYSchedule.exe
+E:\MYSchedule\MYSchedule\bin\Release\MYSchedule.pdb
+E:\MYSchedule\MYSchedule\bin\Release\LinqToExcel.dll
+E:\MYSchedule\MYSchedule\bin\Release\Remotion.Data.Linq.dll
+E:\MYSchedule\MYSchedule\bin\Release\Remotion.dll
+E:\MYSchedule\MYSchedule\bin\Release\Remotion.Interfaces.dll
+E:\MYSchedule\MYSchedule\bin\Release\LinqToExcel.xml
+E:\MYSchedule\MYSchedule\obj\Release\Interop.ADODB.dll
+E:\MYSchedule\MYSchedule\obj\Release\Interop.ADOX.dll
+E:\MYSchedule\MYSchedule\obj\Release\MYSchedule.csproj.ResolveComReference.cache
+E:\MYSchedule\MYSchedule\obj\Release\MYSchedule.exe
+E:\MYSchedule\MYSchedule\obj\Release\MYSchedule.pdb
