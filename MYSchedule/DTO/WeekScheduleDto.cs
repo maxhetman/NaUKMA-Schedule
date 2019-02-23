@@ -10,9 +10,5 @@ namespace MYSchedule.DTO
         public WeekDto WeekDto; //PPK FK
         public ScheduleRecordDto SheduleRecord; //PPK FK
 
-        public override string ToString()
-        {
-            return $"{nameof(WeekDto)}: {WeekDto}, {nameof(SheduleRecord)}: {SheduleRecord}";
-        }
     }
 }

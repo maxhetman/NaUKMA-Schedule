@@ -7,9 +7,9 @@ namespace MYSchedule.DTO
         public int Id; 
         public string Name;
 
-        public override string ToString()
+        public override int GetHashCode()
         {
-            return $"{nameof(Id)}: {Id}, {nameof(Name)}: {Name}";
+            return (Name != null ? Name.GetHashCode() : 0);
         }
     }
 }

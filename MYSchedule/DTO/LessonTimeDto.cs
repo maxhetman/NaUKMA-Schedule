@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using MYSchedule.Utils;
 
 namespace MYSchedule.DTO
@@ -8,36 +10,53 @@ namespace MYSchedule.DTO
         public int Number; //1,2,..,7
         public string LessonTimePeriod; //8:30-9:50...
 
+
+
+        private static Dictionary<int, string> LessonTimeToNumber;
+
+        #region Utils
+
+
+        static LessonTimeDto()
+        {
+            LessonTimeToNumber = new Dictionary<int, string>()
+            {
+                {1, "8:30-9:50"},
+                {2, "10:00-11:20"},
+                {3, "11:40-13:00"},
+                {4, "13:30-14:50"},
+                {5, "15:00-16:20"},
+                {6, "16:30-17:50"},
+                {7, "18:00-19:20"}
+            };
+        }
+
         public static int GetNumberFromPeriod(string period)
         {
-            period = period.Replace(" ", String.Empty);
+            period = period.Replace(" ", String.Empty).Replace(".", ":");
 
-            switch (period)
+            foreach (KeyValuePair<int, string> entry in LessonTimeToNumber)
             {
-                case "8:30-9:50":
-                    return 1;
-                case "10:00-11:20":
-                    return 2;
-                case "11:40-13:00":
-                    return 3;
-                case "13:30-14:50":
-                    return 4;
-                case "15:00-16:20":
-                    return 5;
-                case "16:30-17:50":
-                    return 6;
-                case "18:00-19:20":
-                    return 7;
-                default:
-                    Logger.LogException("[LessonDto] Wrong LessonTimePeriod: " + period);
-                    return -1;
-            }        
-            
+                if (entry.Value == period)
+                    return entry.Key;
+            }
+
+            Logger.LogException("[LessonDto] Wrong LessonTimePeriod: " + period);
+            return -1;
+
 ;        }
 
-        public override string ToString()
+        public static string GetPeriodFromNumber(int number)
         {
-            return $"{nameof(Number)}: {Number}, {nameof(LessonTimePeriod)}: {LessonTimePeriod}";
+            return LessonTimeToNumber[number];
         }
+
+        #endregion    
+
+        public override int GetHashCode()
+        {
+            return (LessonTimePeriod != null ? LessonTimePeriod.GetHashCode() : 0);
+        }
+
     }
 }

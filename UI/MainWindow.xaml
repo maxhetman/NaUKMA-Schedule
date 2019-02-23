@@ -1,0 +1,180 @@
+﻿<Window x:Class="UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UI"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        mc:Ignorable="d"
+        Title="Schedule" MinHeight="520.562" MinWidth="885" Width="733.5">
+    <Grid Name="mainGrid" RenderTransformOrigin="0.5,0.5" Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}">
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <ScaleTransform/>
+                <SkewTransform/>
+                <RotateTransform Angle="0.049"/>
+                <TranslateTransform/>
+            </TransformGroup>
+        </Grid.RenderTransform>
+        <TabControl x:Name="tabControl" VerticalContentAlignment="Bottom" VerticalAlignment="Top" Height="110" Background="#FF98C9C7">
+            <TabItem Header="Методист" Name="methodistTab">
+                <Grid  Margin="0,0,79,0" Visibility="Visible" Opacity="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="27*"/>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="8*"/>
+                        <ColumnDefinition Width="183*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label x:Name="label7" Foreground="DarkSlateGray" Content="Знайти" HorizontalAlignment="Left" Margin="31,6,0,0" VerticalAlignment="Top" Height="30" Width="68" FontWeight="Bold"/>
+
+                    <ComboBox Name="mQueries" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top" Width="138" Grid.ColumnSpan="4" Height="22" RenderTransformOrigin="0.549,-0.166">
+                        <ComboBoxItem Name="mquery1" IsSelected="True">Зайнятість Аудиторій</ComboBoxItem>
+                        <ComboBoxItem Name="mquery2">Розклад на тиждень</ComboBoxItem>
+                        <ComboBoxItem Name="classroomConsistensy" Content="Коректність аудиторій"/>
+                        <ComboBoxItem Name="teacherConsistensy" Content="Коректність викладачів"/>
+                    </ComboBox>
+                    <ContentControl Name ="methoditsParamsQuery1" Margin="0,10,12,10" Grid.Column="4" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">
+                        <Grid ShowGridLines="True" Margin="0,0,-41,0">
+                            <CheckBox x:Name="showAllClassroms" Content="Всі аудиторії" Margin="10,4,475,28" VerticalContentAlignment="Center"/>
+                            <StackPanel Height="57" Margin="131,0,0,0" Width="73" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <Label Content="Корпус" />
+                                <ComboBox x:Name="buildings"/>
+                            </StackPanel>
+                            <CheckBox x:Name="showComputerClassrooms" Content="Комп`ютерні" HorizontalAlignment="Left" Margin="10,29,0,0" VerticalAlignment="Top" Height="25" Width="93"/>
+                            <CheckBox x:Name="showNotComputerClassrooms" Content="Не комп`ютерні" HorizontalAlignment="Left" Margin="10,48,0,-11" VerticalAlignment="Top" Height="25" Width="116"/>
+                            <StackPanel HorizontalAlignment="Left" Height="57" Margin="218,0,0,0" VerticalAlignment="Top" Width="107">
+                                <Label x:Name="label" Content="Номер аудиторії"/>
+                                <ComboBox x:Name="classRoomNumbers"/>
+                            </StackPanel>
+                            <StackPanel Margin="340,0,0,-11" HorizontalAlignment="Left" VerticalAlignment="Top" Width="104" MinWidth="112">
+                                <Label  Content="Виберіть тиждень" Height="30" Width="111"/>
+                                <ComboBox x:Name="mquery1Weeks" Width="111" Height="24" Margin="0,-6,0,25"/>
+
+                            </StackPanel>
+
+
+                            <Button x:Name="mquery1reset" Content="Скинути &#xD;&#xA;фільтри" HorizontalAlignment="Left" Margin="468,15,0,0" VerticalAlignment="Top" Width="72" Height="37"/>
+
+                        </Grid>
+                    </ContentControl>
+                    <ContentControl Name ="methoditsParamsQuery2" Margin="0,10,51,10" Visibility="Collapsed" Grid.Column="4">
+                        <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="336">
+                            <StackPanel HorizontalAlignment="Left" Height="57" Margin="10,-10,0,0" VerticalAlignment="Top" Width="99">
+                                <Label x:Name="label1" Content="Номер тижня"/>
+                                <ComboBox x:Name="mquery2Weeks" Height="24" Margin="10,0"/>
+                            </StackPanel>
+
+                        </Grid>
+                    </ContentControl>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Викладач" Name="teacherTab">
+                <Grid Background="#FF98C9C7">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="29*"/>
+                        <ColumnDefinition Width="142*"/>
+                        <ColumnDefinition Width="14*"/>
+                        <ColumnDefinition Width="809*"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="comboBox1" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="142" Height="32" Grid.ColumnSpan="3" MinWidth="143">
+                        <ComboBoxItem IsSelected="True" Name="teacherSubjectScheduleQuery" Content="Розклад предмета"/>
+                        <ComboBoxItem Name="teacherScheduleQuery" Content="Розклад викладача"/>
+                    </ComboBox>
+                    <ContentControl Name="teacherSubjectScheduleParams" HorizontalAlignment="Left" Margin="3,10,0,0" VerticalAlignment="Top" Height="57" Width="571" Grid.Column="3">
+                        <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="571">
+                            <ComboBox x:Name="teacherSpecialtyCb" HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top" Width="193"/>
+                            <Label x:Name="label4" Content="Спеціальність" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Height="26" Width="120"/>
+                            <ComboBox x:Name="teacherYearOfStudyingCb" HorizontalAlignment="Left" Margin="224,26,0,0" VerticalAlignment="Top" Width="57"/>
+                            <Label x:Name="label5" Content="Курс" HorizontalAlignment="Left" Margin="224,0,0,0" VerticalAlignment="Top" Height="26" Width="57"/>
+                            <ComboBox x:Name="teacherSubjectCb" HorizontalAlignment="Left" Margin="306,26,0,0" VerticalAlignment="Top" Width="203"/>
+                            <Label x:Name="label6" Content="Предмет" HorizontalAlignment="Left" Margin="306,-5,0,0" VerticalAlignment="Top" Height="26" Width="120"/>
+
+                        </Grid>
+
+                    </ContentControl>
+                    <ContentControl Name="teacherScheduleParams" HorizontalAlignment="Left" Margin="13,10,0,0" VerticalAlignment="Top" Height="57" Width="557" Grid.Column="3" Visibility="Collapsed">
+                        <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="557">
+                            <ComboBox x:Name="teacherWeekSelect" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="127" Height="32">
+                            </ComboBox>
+                            <Label x:Name="label8" Content="Вибрати тиждень" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Height="25" Width="134"/>
+                            <ComboBox x:Name="teacherNameSelect" HorizontalAlignment="Left" Margin="149,25,0,0" VerticalAlignment="Top" Width="97" Height="32"/>
+                            <Label x:Name="label9" Content="Прізвище" HorizontalAlignment="Left" Margin="149,0,0,0" VerticalAlignment="Top" Height="25" Width="97"/>
+
+                        </Grid>
+
+                    </ContentControl>
+                    <Label x:Name="label2" Content="Знайти" Grid.Column="1" HorizontalAlignment="Left" Margin="10,4,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.493,0.166" Width="59"/>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Студент" Name="studentTab">
+                <Grid Background="#FF98C9C7">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="14*"/>
+                        <ColumnDefinition Width="262*"/>
+                        <ColumnDefinition Width="595*"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="comboBox3" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="147" Height="32" Grid.ColumnSpan="2">
+                        <ComboBoxItem IsSelected="True" Name="studentSubjectScheduleQuery" Content="Розклад предмета"/>
+                        <ComboBoxItem Name="studentScheduleQuery" Content="Розклад спеціальності"/>
+                    </ComboBox>
+                    <ContentControl Name="studentSubjectScheduleParams" HorizontalAlignment="Left" Margin="148.206,10,0,0" VerticalAlignment="Top" Height="67" Width="510" Grid.ColumnSpan="2" Grid.Column="1">
+                        <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="571">
+                            <ComboBox x:Name="studentSpecialtyCb" HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top" Width="192"/>
+                            <Label x:Name="label11" Content="Спеціальність" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Height="26" Width="120"/>
+                            <ComboBox x:Name="studentYearOfStudyingCb" HorizontalAlignment="Left" Margin="218,25,0,0" VerticalAlignment="Top" Width="61"/>
+                            <Label x:Name="label12" Content="Курс" HorizontalAlignment="Left" Margin="218,-1,0,0" VerticalAlignment="Top" Height="26" Width="74"/>
+                            <ComboBox x:Name="studentSubjectCb" HorizontalAlignment="Left" Margin="307,25,0,0" VerticalAlignment="Top" Width="199"/>
+                            <Label x:Name="label13" Content="Предмет" HorizontalAlignment="Left" Margin="307,0,0,0" VerticalAlignment="Top" Height="26" Width="120"/>
+
+                        </Grid>
+
+                    </ContentControl>
+                    <ContentControl Name="studentScheduleParams" HorizontalAlignment="Left" Margin="13,10,0,0" VerticalAlignment="Top" Height="57" Width="557" Grid.ColumnSpan="3" Visibility="Collapsed">
+                        <Grid HorizontalAlignment="Left" Height="57" VerticalAlignment="Top" Width="557">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="135*"/>
+                                <ColumnDefinition Width="136*"/>
+                                <ColumnDefinition Width="286*"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="studentWeekSelect" HorizontalAlignment="Left" Margin="19,25,0,0" VerticalAlignment="Top" Width="127" Height="22" Grid.Column="1" Grid.ColumnSpan="2">
+                            </ComboBox>
+                            <Label x:Name="label14" Content="Вибрати тиждень" HorizontalAlignment="Left" Margin="19,0,0,0" VerticalAlignment="Top" Height="25" Width="134" Grid.Column="1" Grid.ColumnSpan="2"/>
+                            <ComboBox x:Name="studentSpecialtySelect" HorizontalAlignment="Left" Margin="21,25,0,0" VerticalAlignment="Top" Width="157" Height="22" Grid.Column="2"/>
+                            <Label x:Name="label15" Content="Спеціальність" HorizontalAlignment="Left" Margin="21,0,0,0" VerticalAlignment="Top" Height="25" Width="106" Grid.Column="2"/>
+                            <Label x:Name="label16" Content="Курс" Grid.Column="2" HorizontalAlignment="Left" Margin="197,0,0,0" VerticalAlignment="Top" Height="25" Width="79"/>
+                            <ComboBox x:Name="studentCourseSelect" Grid.Column="2" HorizontalAlignment="Left" Margin="197,25,0,0" VerticalAlignment="Top" Width="79" RenderTransformOrigin="1.099,0.27"/>
+
+                        </Grid>
+
+                    </ContentControl>
+                    <Label x:Name="label17" Content="Знайти" HorizontalAlignment="Left" Margin="21.206,10,0,0" VerticalAlignment="Top" Width="53" Grid.Column="1"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Налаштування" Name="settingsTab"  >
+                <Grid Background="#FF98C9C7">
+                    <DatePicker Name="weekDateSelector" HorizontalAlignment="Left" Margin="158,24,0,0" VerticalAlignment="Top" Height="31" Width="134"/>
+                    <Label x:Name="label3" Content="Виберіть дату початку&#xD;&#xA;першого тижня:" HorizontalAlignment="Left" Margin="10,14,0,0" VerticalAlignment="Top" Width="134" Height="41"/>
+                </Grid>
+
+            </TabItem>
+        </TabControl>
+        <DataGrid x:Name="dataView" IsReadOnly="True" ColumnWidth="*" ItemsSource="{Binding}" Margin="10,137,136,10"/>
+
+        <Grid Name="loader" Margin="20" Visibility="Collapsed">
+            <fa:ImageAwesome Icon="Spinner"  Spin="True" Height="48" Width="48" />
+        </Grid>
+        <Button x:Name="exportBtn" Background="LightGreen" Foreground="Navy" Content="Експорт&#xD;&#xA;в Excel&#xA;" Margin="0,180,23,0" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90" Height="45" FontWeight="Bold"/>
+        <Button x:Name="searchBtn" Content="Виконати" Margin="0,47,10,0" Width="67" Height="46" HorizontalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+        <Button x:Name="addExcelBtn" Background="LightSteelBlue" Foreground="Navy" Content="Завантажити &#xD;&#xA;розклад&#xA;" HorizontalAlignment="Right" Margin="0,121,23,0" VerticalAlignment="Top" Width="90" Height="45" HorizontalContentAlignment="Center" Click="addExcelBtn_Click" FontWeight="Bold"/>
+        <Button x:Name="clearDbButton" Background="Brown" Foreground="White" Content="Почистити &#xD;&#xA;базу" HorizontalAlignment="Right" Margin="0,0,23,61" VerticalAlignment="Bottom" Width="90" Height="48"/>
+        <Label x:Name="dataViewHeader" HorizontalAlignment="Left" Margin="0,110,0,0" VerticalAlignment="Top" Width="668" HorizontalContentAlignment="Center" FontWeight="Bold" Height="27"/>
+        <Label x:Name="label10" Content="З любов'ю від &#xD;&#xA;Тихончука Ярослава&#xD;&#xA;та Гетьмана Максима" HorizontalAlignment="Right" Margin="681,429,0,0" VerticalAlignment="Bottom" Height="56" Width="136"/>
+
+    </Grid>
+
+
+
+</Window>

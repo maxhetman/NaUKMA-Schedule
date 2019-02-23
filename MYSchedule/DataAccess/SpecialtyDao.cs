@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.OleDb;
+using System.Windows.Controls;
 using MYSchedule.DTO;
 using MYSchedule.Utils;
 
@@ -12,6 +13,7 @@ namespace MYSchedule.DataAccess
                                                " Values (@Name)";
 
         private const string getSpecialtyIdByName = "Select Id From Specialty Where Name = @Name";
+        private const string getAllSpecialtiesQuery = "Select Name From Specialty";
 
         public static int AddIfNotExists(SpecialtyDto specialty)
         {
@@ -43,7 +45,7 @@ namespace MYSchedule.DataAccess
                 {
                     return result;
                 }
-                
+
                 Logger.LogException("Could not add specialty");
                 return -1;
             }
@@ -95,5 +97,29 @@ namespace MYSchedule.DataAccess
         //    }
         //}
         //}
+        public static string[] GetAllSpecialties()
+        {
+            DataTable dataTable = new DataTable();
+
+            using (OleDbDataAdapter dataAdapter = new OleDbDataAdapter())
+            {
+                // Create the command and set its properties
+                dataAdapter.SelectCommand = new OleDbCommand();
+                dataAdapter.SelectCommand.Connection = new OleDbConnection(ConnectionConfig.ConnectionString);
+                dataAdapter.SelectCommand.CommandType = CommandType.Text;
+                dataAdapter.SelectCommand.CommandText = getAllSpecialtiesQuery;
+
+                // Fill the datatable From adapter
+                dataAdapter.Fill(dataTable);
+                string[] res = new string[dataTable.Rows.Count];
+
+                for (int i = 0; i < dataTable.Rows.Count; i++)
+                {
+                    res[i] = dataTable.Rows[i][0].ToString();
+                }
+
+                return res;
+            }
+        }
     }
 }

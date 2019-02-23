@@ -7,7 +7,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using LinqToExcel;
 using MYSchedule.DTO;
+using MYSchedule.Exceptions;
 using MYSchedule.Utils;
+using Remotion.Mixins.CodeGeneration.DynamicProxy.TypeGeneration;
 
 namespace MYSchedule.Parser
 {
@@ -16,13 +18,14 @@ namespace MYSchedule.Parser
         private static SpecialtyDto _specialty;
         private static int _yearOfStudying;
         private static Row[] _rows;
-
+        private static string _currentFilePath;
         private static Dictionary<ScheduleRecordDto, List<int>> _weekScheduleRecords =
             new Dictionary<ScheduleRecordDto, List<int>>();
 
-        public static Dictionary<ScheduleRecordDto, List<int>> GetScheduleFromExcel()
+        public static Dictionary<ScheduleRecordDto, List<int>> GetScheduleFromExcel(string filePath)
         {
-            var excel = new ExcelQueryFactory(@"E:\TestExcel.xlsx");
+            _currentFilePath = filePath;
+            var excel = new ExcelQueryFactory(filePath);
     
 
             var rows = from c in excel.Worksheet(0)  // getting first worksheet
@@ -46,13 +49,19 @@ namespace MYSchedule.Parser
             {
                 var nextDay = _rows[i][0].Value.ToString();
 
+
+                var nextTime = _rows[i][1].Value.ToString();
+
                 if (!string.IsNullOrEmpty(nextDay))
                 {
                     currentDay = nextDay;
-                    currentDayDto = new DayDto {DayNumber = DayDto.GetNumberByName(currentDay)};
+                    currentDayDto = new DayDto { DayNumber = DayDto.GetNumberByName(currentDay), DayName = currentDay};
+                } else if (LessonTimeDto.GetNumberFromPeriod(nextTime) == 1)
+                {
+                    var curDayIndex = DayDto.GetNumberByName(currentDay);
+                    currentDay = DayDto.DayNameByNumber[curDayIndex+1];
+                    currentDayDto = new DayDto { DayNumber = curDayIndex + 1, DayName = currentDay};
                 }
-
-                var nextTime = _rows[i][1].Value.ToString();
 
                 if (!string.IsNullOrEmpty(nextTime))
                 {
@@ -67,28 +76,48 @@ namespace MYSchedule.Parser
             
         }
 
+
         private static void AppendNewScheduleRecord(DayDto dayDto, string time, Row row)
         {
             try
             {
                 string subject = row[2].Value.ToString();
-
-                if (string.IsNullOrEmpty(subject))
-                    return;
-
-                LessonTimeDto lessonTime = new LessonTimeDto {Number = LessonTimeDto.GetNumberFromPeriod(time)};
                 TeacherDto teacher = GetTeacherData(row[3].Value.ToString());
-
-                int groupCheck;
-                int.TryParse(row[4].Value.ToString(), out groupCheck);
-                int? group = groupCheck > 0 ? (int?) groupCheck : null; //group == null if lesson type is lecture
+                ClassRoomDto classRoom = new ClassRoomDto {Number = row[6].Value.ToString().Replace(" ", String.Empty)};
 
                 var weeksString = row[5].Value.ToString();
 
-                ClassRoomDto classRoom = new ClassRoomDto {Number = row[6].Value.ToString().Replace(" ", String.Empty)};
-                
+                if (string.IsNullOrEmpty(teacher.LastName))
+                {
+                    teacher.LastName = "Вакансія"; // in case of null
+                }
+
+
+                var groupStr = row[4].Value.ToString(); //either number or 'lecture'           
+
+                if (string.IsNullOrEmpty(subject) || subject.Length<=2)
+                    return;
+
+                if (string.IsNullOrEmpty(classRoom.Number)
+                    || string.IsNullOrEmpty(weeksString) || string.IsNullOrEmpty(groupStr))
+                {
+                    throw new InvalidInputException("Некоректні дані: " + dayDto.DayName + ", " + time + " у файлі " + _currentFilePath);
+                }
+
+                LessonTimeDto lessonTime = new LessonTimeDto {Number = LessonTimeDto.GetNumberFromPeriod(time)};
+                string group = string.Empty;
+
+                if (groupStr.Any(char.IsDigit))
+                {
+                    group = groupStr.Replace(" ", "");
+                }
+                else
+                {
+                    group = string.Empty;
+                }
+
                 LessonTypeDto lessonType = new LessonTypeDto();
-                lessonType.Id = LessonTypeDto.GetIdByType(group == null ? LessonType.Lecture : LessonType.Practice);
+                lessonType.Id = LessonTypeDto.GetIdByType(group == string.Empty ? LessonType.Лекція : LessonType.Практика);
 
                 ScheduleRecordDto scheduleRecord = new ScheduleRecordDto
                 {
@@ -104,22 +133,25 @@ namespace MYSchedule.Parser
                     Weeks = weeksString
                 };
 
-                var weeksList = ParseWeeks(row[5].Value.ToString());
+                var weeksStr = row[5].Value.ToString().Replace(".", ","); //replace 6.9 to 6,9
+                var weeksList = Utils.Utils.ParseWeeks(weeksStr);
 
                 _weekScheduleRecords.Add(scheduleRecord, new List<int>());
                 foreach (var weekNumber in weeksList)
                 {
-                   _weekScheduleRecords[scheduleRecord].Add(weekNumber);
+                    _weekScheduleRecords[scheduleRecord].Add(weekNumber);
                 }
 
             }
-
+            catch (InvalidInputException e)
+            {
+                Logger.LogException(e);
+                throw e;
+            }
             catch (Exception e)
             {
                 Logger.LogException(e);
             }
-
-
         }
 
         private static void SetSpecialtyNameAndYearOfStudying(String columnValue)
@@ -129,6 +161,8 @@ namespace MYSchedule.Parser
                 var comaIndex = columnValue.IndexOf(",");
                 var specialtyName = columnValue.Substring(0, comaIndex);
 
+                specialtyName = specialtyName.Replace("\"", "").Trim();
+   
                 _specialty = new SpecialtyDto {Name = specialtyName};
 
                 _yearOfStudying = Convert.ToInt32(Regex.Match(columnValue.Substring(comaIndex), @"\d+").Value);
@@ -179,16 +213,7 @@ namespace MYSchedule.Parser
                 }
             }
 
-
-            //var dataArr = teacherData.Trim().Split(' ');
-            //var lastName = dataArr[dataArr.Length - 1].Trim();
-            //var initials = dataArr[dataArr.Length - 2].Trim();
-            //var position = "";
-
-            //for (int i = 0; i < dataArr.Length - 2; i++)
-            //{
-            //    position += dataArr[i];
-            //}
+            position = GetUnifiedPosition(position);
 
             return new TeacherDto
             {
@@ -198,35 +223,24 @@ namespace MYSchedule.Parser
             };
         }
 
-        private static HashSet<int> ParseWeeks(string weeks)
+        private static string GetUnifiedPosition(string positionStr)
         {
-            weeks = weeks.Replace(" ", String.Empty);
-            var weeksArray = weeks.Split(',');
-            var weeksList = new HashSet<int>();
-            foreach (var value in weeksArray)
+            if (positionStr.Contains("ст") && positionStr.Contains("викл"))
             {
-                int weekNumber;
-                int.TryParse(value, out weekNumber);
-
-                if (weekNumber > 0)
-                {
-                    weeksList.Add(weekNumber);
-                    continue;
-                }
-                var notNumberRegexp = @"[^\d]";
-                var leftMatch = Regex.Match(value, notNumberRegexp);
-                var rightMatch = Regex.Match(value, notNumberRegexp, RegexOptions.RightToLeft);
-
-                if (leftMatch.Success && rightMatch.Success)
-                {
-                    var leftNumber = int.Parse(value.Substring(0, leftMatch.Index));
-                    var rightNumber = int.Parse(value.Substring(rightMatch.Index + 1));
-
-                    for (int i = leftNumber; i <= rightNumber; i++)
-                        weeksList.Add(i);
-                }
+                return "ст. викл.";
             }
-            return weeksList;
+
+            if (positionStr.Contains("ас") || positionStr.Contains("ac"))
+            {
+                return "ас.";
+            }
+
+            if (positionStr.Contains("доц"))
+            {
+                return "доц";
+            }
+
+            return positionStr;
         }
     }
 

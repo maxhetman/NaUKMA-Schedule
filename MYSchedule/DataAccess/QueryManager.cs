@@ -9,15 +9,96 @@ namespace MYSchedule.DataAccess
     public static class QueryManager
     {
 
-        public static DataTable GetClassRoomsBusyness(int? buildingNumber = null, bool? isComputer = null,
+        public static DataTable GetClassRoomsAvailabilityForAllWeeks(int? buildingNumber = null, bool? isComputer = null,
             string classroomNumber = null)
         {
-            string query = Queries.ClassroomsBusynessQuery(buildingNumber, isComputer, classroomNumber) ;
+            string query = Queries.ClassRoomsAvailabilityForAllWeeksQuery(buildingNumber, isComputer, classroomNumber) ;
             
             DataTable DT = Access2Dt(query);
 
-            if (DT == null || DT.Rows.Count < 1) throw new Exception("Data not found");
-            else return DT;
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
+        public static DataTable GetClassRoomsAvailabilityForSelectedweek(int week, int? buildingNumber = null, bool? isComputer = null,
+            string classroomNumber = null )
+        {
+            string query = Queries.ClassRoomsAvailabilityForSelectedWeekQuery(buildingNumber, isComputer, classroomNumber, week);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
+
+
+        public static DataTable GetScheduleBySubjectSpecialtyAndCourse(string specialty, int course, string subject)
+        {
+            string query = Queries.LessonScheduleByCourseSpecialtySubjectQuery(specialty, course, subject);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
+        public static DataTable GetScheduleForWeek(int week)
+        {
+            string query = Queries.ScheduleForWeekQuery(week);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
+        public static DataTable GetTeacherScheduleForAllWeeks(string teacherLastName, string initials)
+        {
+            string query = Queries.TeacherScheduleForAllWeeksQuery(teacherLastName, initials);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
+        public static DataTable GetStudentScheduleForAllWeeks(string specialtyName, int course)
+        {
+            string query = Queries.StudentScheduleForAllWeeksQuery(specialtyName, course);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
+        public static DataTable GetTeacherScheduleForSelectedWeek(string teacherLastName, string initials, int weekNumber)
+        {
+            string query = Queries.TeacherScheduleForSelectedWeekQuery(teacherLastName, initials, weekNumber);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
+        }
+
+        public static DataTable GetStudentScheduleForSelectedWeek(string specialty, int week, int course)
+        {
+            string query = Queries.StudentScheduleForSelectedWeekQuery(specialty, week, course);
+
+            DataTable DT = Access2Dt(query);
+
+            if (DT == null) return new DataTable();
+
+            return DT;
         }
 
         private static DataTable Access2Dt(string query)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MYSchedule.Utils;
 
 namespace MYSchedule.DTO
@@ -7,6 +8,20 @@ namespace MYSchedule.DTO
     {
         public int DayNumber; //0-6
         public string DayName; //Monday-Sunday
+        public static Dictionary<int, string> DayNameByNumber;
+
+        static DayDto()
+        {
+            DayNameByNumber = new Dictionary<int, string>()
+            {
+                {1, Constants.Monday},
+                {2, Constants.Tuesday},
+                {3, Constants.Wednesday},
+                {4, Constants.Thursday},
+                {5, Constants.Friday},
+                {6, Constants.Saturday}
+            };
+        }
 
         public static int GetNumberByName(string name)
         {
@@ -14,17 +29,17 @@ namespace MYSchedule.DTO
 
             switch (name)
             {
-                case "Понеділок":
+                case Constants.Monday:
                     return 1;
-                case "Вівторок":
+                case Constants.Tuesday:
                     return 2;
-                case "Середа":
+                case Constants.Wednesday:
                     return 3;
-                case "Четвер":
+                case Constants.Thursday:
                     return 4;
-                case "П`ятниця":
+                case Constants.Friday:
                     return 5;
-                case "Субота":
+                case Constants.Saturday:
                     return 6;
                 default:
                     if (name.EndsWith("тниця"))
@@ -38,9 +53,10 @@ namespace MYSchedule.DTO
                     }
             }           
         }
-        public override string ToString()
+
+        public override int GetHashCode()
         {
-            return $"{nameof(DayNumber)}: {DayNumber}, {nameof(DayName)}: {DayName}";
+            return (DayName != null ? DayName.GetHashCode() : 0);
         }
     }
 }

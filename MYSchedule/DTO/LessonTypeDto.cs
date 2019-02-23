@@ -15,16 +15,16 @@ namespace MYSchedule.DTO
             return (int) type;
         }
 
-        public override string ToString()
+        public override int GetHashCode()
         {
-            return $"{nameof(Id)}: {Id}, {nameof(Type)}: {Type}";
+            return (Type != null ? Type.GetHashCode() : 0);
         }
 
     }
 
     public enum LessonType
     {
-        Lecture = 1,
-        Practice = 2
+        Лекція = 1,
+        Практика = 2
     }
 }

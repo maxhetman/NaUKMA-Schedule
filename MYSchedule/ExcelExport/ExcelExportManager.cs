@@ -1,78 +1,170 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Microsoft.Office.Interop.Excel;
-using MYSchedule.DataAccess;
+using MYSchedule.DTO;
 using DataTable = System.Data.DataTable;
+using Constants = MYSchedule.Utils.Constants;
 
 namespace MYSchedule.ExcelExport
 {
-    class ExcelExportManager
+    public struct CellIndex
     {
-        public static void ShowAllClassRooms(DataTable dataTable)
+        public CellIndex(int x, int y)
         {
-            var table = QueryManager.GetClassRoomsBusyness();
+            this.x = x;
+            this.y = y;
+        }
 
-           Application excel = new Application();
+        public int x;
+        public int y;
+    }
+
+    public struct TeacherWeeksWithCellIndex
+    {
+        public string TeacherName;
+        public List<int> Weeks;
+        public CellIndex CellIndex;
+        public string DayName;
+    }
+
+    public class ExcelExportManager
+    {
+
+        #region Variables
+
+        private static int finalXCoord;
+
+        private static Dictionary<string, CellIndex> DayCellsIndexes = new Dictionary<string, CellIndex>()
+        {
+            {Constants.Monday, new CellIndex() {x = 2, y = 4}},
+            {Constants.Tuesday, new CellIndex() {x = 2, y = 6}},
+            {Constants.Wednesday, new CellIndex() {x = 2, y = 8}},
+            {Constants.Thursday, new CellIndex() {x = 2, y = 10}},
+            {Constants.Friday, new CellIndex() {x = 2, y = 12}},
+            {Constants.Saturday, new CellIndex() {x = 2, y = 14}}
+        };
+
+        private static List<string> ClassRooms;
+
+        #endregion
+
+        public static void ShowAllClassRooms(string header, DataTable dataTable)
+        {
+            Application excel = new Application();
 
             excel.Application.Workbooks.Add(true);
+            Worksheet worksheet = (Worksheet) excel.ActiveSheet;
 
-            int columnIndex = 0;
+            Utils.Utils.InitCommonStyle(worksheet);
 
-            AlignTextHorizontal(excel);
+            CreateHeader(header, worksheet);
+            CreateSkeleton(worksheet, dataTable);
+            FillClassRooms(worksheet);
+            FillTable(dataTable, worksheet);
 
-
-            CreateExcelHeader(excel);
-
-            CreateExcelSkeleton(excel, dataTable);
-
-            int rowIndex = 0;
-
-            //foreach (DataRow row in table.Rows)
-            //{
-            //    rowIndex++;
-            //    columnIndex = 0;
-            //    foreach (DataColumn col in table.Columns)
-            //    {
-            //        columnIndex++;
-            //        if (columnIndex == 4 || columnIndex == 5 || columnIndex == 6)
-            //        {
-            //            if (columnIndex == 4)
-            //            {
-            //                excel.Cells[rowIndex + 1, columnIndex]
-            //                    = Enum.GetName(typeof(Occupation), row[col.ColumnName]);
-            //            }
-
-            //            if (columnIndex == 5)
-            //            {
-            //                excel.Cells[rowIndex + 1, columnIndex]
-            //                    = Enum.GetName(typeof(MaritalStatus), row[col.ColumnName]);
-            //            }
-
-            //            if (columnIndex == 6)
-            //            {
-            //                excel.Cells[rowIndex + 1, columnIndex]
-            //                    = Enum.GetName(typeof(HealthStatus), row[col.ColumnName]);
-            //            }
-            //        }
-            //        else
-            //        {
-            //            excel.Cells[rowIndex + 1, columnIndex] = row[col.ColumnName].ToString();
-            //        }
-            //    }
-            //}
+            FinalStyleAdditions(worksheet);
 
             excel.Visible = true;
-            Worksheet worksheet = (Worksheet) excel.ActiveSheet;
+
+            //   worksheet.Range["B1","B100"].EntireColumn.Style.Orientation = Microsoft.Office.Interop.Excel.XlOrientation.xlUpward;
             worksheet.Activate();
         }
 
-        private static void CreateExcelSkeleton(Application excel, DataTable dataTable)
+        #region Helpers
+
+        private static void FillTable(DataTable dataTable, Worksheet worksheet)
+        {
+            List<TeacherWeeksWithCellIndex> teachersData = new List<TeacherWeeksWithCellIndex>();
+
+            var currentTime = -1;
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+
+                var dayName = row[0].ToString();
+                var lessonTimeNumber = LessonTimeDto.GetNumberFromPeriod(row[1].ToString());
+                var classroom = row[2].ToString();
+                var cellIndex = GetIndexByDayLessonClassroom(dayName, lessonTimeNumber, classroom);
+
+                if (currentTime != lessonTimeNumber)
+                {
+                    teachersData.Clear(); //we dont give a fuck if teacher has same classes on different lesson times
+                    currentTime = lessonTimeNumber;
+                }
+
+                var teacherName = string.Format("{0} {1}", row[3], row[4]);
+                var weeks = row[5].ToString();
+
+                AddCellInfo(worksheet, cellIndex, teacherName, weeks);
+
+                TeacherWeeksWithCellIndex currentTeacherData = new TeacherWeeksWithCellIndex
+                {
+                    CellIndex = cellIndex,
+                    TeacherName = teacherName,
+                    Weeks = Utils.Utils.ParseWeeks(weeks),
+                    DayName = dayName
+                };
+
+                foreach (var teacherData in teachersData)
+                {
+                    //teacher has more than one lesson in same time
+                    if (teacherData.TeacherName == currentTeacherData.TeacherName
+                        && teacherData.DayName == currentTeacherData.DayName
+                        && teacherData.Weeks.Intersect(currentTeacherData.Weeks).Any())
+                    {
+                        GenericExcelExport.SetCellBackground(worksheet, teacherData.CellIndex, 
+                            new CellIndex { x= teacherData.CellIndex.x, y= teacherData.CellIndex.y + 1}, XlRgbColor.rgbIndianRed);
+                        GenericExcelExport.SetCellBackground(worksheet, currentTeacherData.CellIndex,
+                            new CellIndex { x = currentTeacherData.CellIndex.x, y = currentTeacherData.CellIndex.y + 1 }, XlRgbColor.rgbIndianRed);
+                    }
+                }
+
+                teachersData.Add(currentTeacherData);
+            }
+        }
+
+        private static void AddCellInfo(Worksheet worksheet, CellIndex cellIndex, string teacherName, string weeks)
+        {
+            var prevWeeks = worksheet.Cells[cellIndex.x, cellIndex.y + 1].Text.ToString();
+
+            var hasPrevWeeks = !string.IsNullOrEmpty(prevWeeks);
+
+            if (!hasPrevWeeks)
+            {
+                worksheet.Cells[cellIndex.x, cellIndex.y] = teacherName;
+                worksheet.Cells[cellIndex.x, cellIndex.y + 1] = weeks;
+                return;
+            }
+
+            var prevName = worksheet.Cells[cellIndex.x, cellIndex.y].Text.ToString();
+            if (prevName != teacherName)
+            {
+                worksheet.Cells[cellIndex.x, cellIndex.y] = prevName + "/\n" + teacherName;
+                worksheet.Cells[cellIndex.x, cellIndex.y + 1] = prevWeeks + "/\n" + weeks;
+            }
+            else
+            {
+                worksheet.Cells[cellIndex.x, cellIndex.y + 1] = prevWeeks + ", " + weeks;
+            }
+
+            List<int> prevWeeksList = Utils.Utils.ParseWeeks(prevWeeks);
+            List<int> currWeeksList = Utils.Utils.ParseWeeks(weeks);
+
+            if (prevWeeksList.Intersect(currWeeksList).Any())
+            {
+                GenericExcelExport.SetCellBackground(worksheet, cellIndex, new CellIndex {x = cellIndex.x, y = cellIndex.y + 1}, XlRgbColor.rgbRed);
+            }
+        }
+
+
+        private static void CreateSkeleton(Worksheet worksheet, DataTable dataTable)
         {
             var classRoomNumbers = new HashSet<string>();
 
             foreach (DataRow row in dataTable.Rows)
             {
-                var number = row[3].ToString();
+                var number = row[2].ToString();
                 if (!classRoomNumbers.Contains(number))
                 {
                     classRoomNumbers.Add(number);
@@ -80,58 +172,113 @@ namespace MYSchedule.ExcelExport
             }
 
             var len = classRoomNumbers.Count;
+
             for (int i = 0; i < 7; i++)
             {
                 var start = 4 + i * len;
-                excel.Range[excel.Cells[start, 1], excel.Cells[start + len - 1, 1]].Merge();
-                excel.Range[excel.Cells[start, 2], excel.Cells[start + len - 1, 2]].Merge();
+                worksheet.Range[worksheet.Cells[start, 1], worksheet.Cells[start + len - 1, 1]].Merge();
+                worksheet.Cells[start, 1] = i + 1;
+                worksheet.Range[worksheet.Cells[start, 2], worksheet.Cells[start + len - 1, 2]].Merge();
+                worksheet.Cells[start, 2] = LessonTimeDto.GetPeriodFromNumber(i + 1);
             }
+
+            ClassRooms = classRoomNumbers.ToList();
         }
 
-        private static void AlignTextHorizontal(Application excel)
+        private static void FillClassRooms(Worksheet worksheet)
         {
-            string startRange = "A1";
-            string endRange = "U500";
-            var currentRange = excel.Range[startRange, endRange];
-            currentRange.Style.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
-        }
-
-        private static void CreateExcelHeader(Application excel)
-        {
-            var header = "Розклад аудиторій на весну 2017-2018";
-
-            excel.Range[excel.Cells[1, 1], excel.Cells[1, 15]].Merge();
-            excel.Cells[1, 1] = header;
-
-
-
-
-            excel.Range[excel.Cells[2, 4], excel.Cells[2, 5]].Merge();
-            excel.Range[excel.Cells[2, 6], excel.Cells[2, 7]].Merge();
-            excel.Range[excel.Cells[2, 8], excel.Cells[2, 9]].Merge();
-            excel.Range[excel.Cells[2, 10], excel.Cells[2, 11]].Merge();
-            excel.Range[excel.Cells[2, 12], excel.Cells[2, 13]].Merge();
-            excel.Range[excel.Cells[2, 14], excel.Cells[2, 15]].Merge();
-
-            excel.Range[excel.Cells[2, 1], excel.Cells[3, 1]].Merge();
-            excel.Range[excel.Cells[2, 2], excel.Cells[3, 2]].Merge();
-            excel.Range[excel.Cells[2, 3], excel.Cells[3, 3]].Merge();
-
-            excel.Cells[2, 1] = "№";
-            excel.Cells[2, 2] = "Час";
-            excel.Cells[2, 3] = "Ауд";
-            excel.Cells[2, 4] = "Понеділок";
-            excel.Cells[2, 6] = "Вівторок";
-            excel.Cells[2, 8] = "Середа";
-            excel.Cells[2, 10] = "Четвер";
-            excel.Cells[2, 12] = "П`ятниця";
-            excel.Cells[2, 14] = "Субота";
-
-            for (int i = 4; i <= 14; i+=2 )
+            var classRoomLength = ClassRooms.Count;
+            int j = 0;
+            var start = 0;
+            for (int i = 0; i < 7; i++)
             {
-                excel.Cells[3, i] = "Прізвище";
-                excel.Cells[3, i+1] = "№ т.";
+                 start = 4 + i * classRoomLength;
+
+                for (j = 0; j < classRoomLength; j++)
+                {
+                    worksheet.Cells[start + j, 3] = ClassRooms[j];
+                }
+            }
+
+            finalXCoord = start + j-1;
+        }
+
+        private static void FinalStyleAdditions(Worksheet worksheet)
+        {
+            var classRoomLength = ClassRooms.Count;
+
+            worksheet.Range["A1", "A1"].Cells.Font.Size = 15;
+            worksheet.Range["A1", "O3"].Cells.Font.Bold = true;
+            worksheet.Range["A1", "O3"].Cells.Borders.Weight = 2d;
+            worksheet.Range["A1", "C"+ finalXCoord].Cells.Borders.Weight = 2d;
+
+            for (int i = 1; i <= 7; i++)
+            {
+                var xCoord = 3 + i*classRoomLength;
+                worksheet.Range["A13", "O" + xCoord].Cells.Borders[XlBordersIndex.xlEdgeBottom].Weight = 2d;
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
+                var yCoord = 5 + i * 2;
+                worksheet.Range[worksheet.Cells[3, yCoord], worksheet.Cells[finalXCoord, yCoord]].Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
+            }
+          
+
+            worksheet.Range["O1", "O" + finalXCoord].Cells.Borders[XlBordersIndex.xlEdgeRight].Weight = 2d;
+
+            worksheet.Range["A1", "U500"].Columns.AutoFit();
+            worksheet.Range["A1", "U500"].Rows.AutoFit();
+        }
+
+        private static CellIndex GetIndexByDayLessonClassroom(string dayName, int lessonNumber, string classroom)
+        {
+            var len = ClassRooms.Count;
+            var x = 4 + (lessonNumber - 1) * len + (ClassRooms.IndexOf(classroom));
+            var y = DayCellsIndexes[dayName].y;
+            return new CellIndex {x = x, y = y};
+        }
+
+        private static void CreateHeader(string header, Worksheet worksheet)
+        {
+            worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, 15]].Merge();
+            worksheet.Cells[1, 1] = header;
+            worksheet.Range[worksheet.Cells[1, 1],
+                worksheet.Cells[1, 1]].Interior.Color = XlRgbColor.rgbBeige;
+
+            worksheet.Range[worksheet.Cells[2, 4], worksheet.Cells[2, 5]].Merge();
+            worksheet.Range[worksheet.Cells[2, 6], worksheet.Cells[2, 7]].Merge();
+            worksheet.Range[worksheet.Cells[2, 8], worksheet.Cells[2, 9]].Merge();
+            worksheet.Range[worksheet.Cells[2, 10], worksheet.Cells[2, 11]].Merge();
+            worksheet.Range[worksheet.Cells[2, 12], worksheet.Cells[2, 13]].Merge();
+            worksheet.Range[worksheet.Cells[2, 14], worksheet.Cells[2, 15]].Merge();
+
+            worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[3, 1]].Merge();
+            worksheet.Range[worksheet.Cells[2, 2], worksheet.Cells[3, 2]].Merge();
+            worksheet.Range[worksheet.Cells[2, 3], worksheet.Cells[3, 3]].Merge();
+
+            worksheet.Cells[2, 1] = "№";
+            worksheet.Cells[2, 2] = "Час";
+            worksheet.Cells[2, 3] = "Ауд";
+            worksheet.Cells[2, 4] = Constants.Monday;
+            worksheet.Cells[2, 6] = Constants.Tuesday;
+            worksheet.Cells[2, 8] = Constants.Wednesday;
+            worksheet.Cells[2, 10] = Constants.Thursday;
+            worksheet.Cells[2, 12] = Constants.Friday;
+            worksheet.Cells[2, 14] = Constants.Saturday;
+
+            worksheet.Range[worksheet.Cells[2, 4],
+                worksheet.Cells[3, 15]].Interior.Color = XlRgbColor.rgbAntiqueWhite;
+
+            for (int i = 4; i <= 14; i += 2)
+            {
+                worksheet.Cells[3, i] = "Прізвище";
+                worksheet.Cells[3, i + 1] = "№ т.";
             }
         }
+
+        #endregion
+
+
     }
 }

@@ -5,12 +5,14 @@ using MYSchedule.Utils;
 
 namespace MYSchedule.DataAccess
 {
-    class TeacherDao
+    public class TeacherDao
     {
         private const string insertTeacher = "Insert Into Teacher(LastName, Initials, [Position])" +
                                              " Values (@LastName, @Initials, @Position)";
 
         private const string getTeacher = "Select Id From Teacher Where LastName = @LastName AND Initials = @Initials";
+
+        private const string getAllTeachers = "Select LastName, Initials From Teacher ORDER BY LastName";
 
         public static int AddIfNotExists(TeacherDto teacher)
         {
@@ -50,7 +52,39 @@ namespace MYSchedule.DataAccess
             }
         }
 
+        public static string[] GetFormattedTeachers()
+        {
+            var teachersDt = GetAllTeachers();
+            string[] res = new string[teachersDt.Rows.Count];
+            for (int i = 0; i < res.Length; i++)
+            {
+                res[i] = GetFormattedTeacherInfo(teachersDt.Rows[i]);
+            }
+            return res;
+        }
 
+        private static string GetFormattedTeacherInfo(DataRow teachersDtRow)
+        {
+            return teachersDtRow[0] + " " + teachersDtRow[1];
+        }
+
+        public static DataTable GetAllTeachers()
+        {
+            DataTable dataTable = new DataTable();
+
+            using (OleDbDataAdapter dataAdapter = new OleDbDataAdapter())
+            {
+                // Create the command and set its properties
+                dataAdapter.SelectCommand = new OleDbCommand();
+                dataAdapter.SelectCommand.Connection = new OleDbConnection(ConnectionConfig.ConnectionString);
+                dataAdapter.SelectCommand.CommandType = CommandType.Text;
+                dataAdapter.SelectCommand.CommandText = getAllTeachers;
+
+                // Fill the datatable From adapter
+                dataAdapter.Fill(dataTable);
+                return dataTable;
+            }
+        }
 
         public static int GetTeacherId(TeacherDto teacher)
         {

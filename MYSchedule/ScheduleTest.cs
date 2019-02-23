@@ -16,17 +16,7 @@ namespace MYSchedule
         public static void Main(string[] args)
         {
 
-            Console.OutputEncoding = Encoding.UTF8;
-            var dt = QueryManager.GetClassRoomsBusyness(buildingNumber: 10, isComputer: true);
 
-            foreach (DataRow one in dt.Rows)
-            {
-                // Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}");
-            }
-
-            ExcelExportManager.ShowAllClassRooms(dt);
-
-            //Console.ReadLine();
             //Stopwatch stopWatch = new Stopwatch();
             //Console.WriteLine("Start parsing");
             //stopWatch.Start();
@@ -53,8 +43,26 @@ namespace MYSchedule
             //    count++;
             //    Console.WriteLine("Milis passed : " + stopWatch.Elapsed.Milliseconds + " for " + count + " record");
             //}
-            //Console.ReadLine();
 
+            Console.OutputEncoding = Encoding.UTF8;
+
+            //var dt = QueryManager.GetClassRoomsAvailability();
+            //ExcelExportManager.ShowAllClassRooms(dt);
+
+         //   var dt = QueryManager.GetScheduleBySubjectSpecialtyAndCourse("\"МП \"\"Комп`ютерні науки\"\"\"", 1, "\"Англійська мова\"");
+           // ExcelExportLessonByCourseAndSpecialty.LessonScheduleByCourseAndSpecialty(dt);
+
+            //var headers = new[] { "Number", "DayName", "LessonTimePeriod", "ClassRoomNumber", "LastName", "Initials", "Type", "Group" };
+            //GenericExcelExport.Export(headers, dt);
+            // Console.WriteLine("ROWS : " + dt.Rows.Count + " COLS : " + dt.Columns.Count);
+            //foreach (DataRow one in dt.Rows)
+            //{
+            //    Console.WriteLine($"{one[0]}, {one[1]}, {one[2]}, {one[3]}, {one[4]}, {one[5]}");
+            //}
+
+
+
+            // Console.ReadLine();
 
             //fileName = @"E:\kek.mdb";
             //var kek = DataBaseCreator.CreateNewAccessDatabase(fileName);
